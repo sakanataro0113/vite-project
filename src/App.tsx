@@ -16,7 +16,7 @@ function App() {
           <img src={reactLogo} className="logo react" alt="React logo" />
         </a>
       </div>
-      <h1>sakanataro</h1>
+      <h1>こんにちは</h1>
       <div className="card">
         <button onClick={() => console.log("こんにちは！")}>
           count is {count}
