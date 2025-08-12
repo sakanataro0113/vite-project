@@ -12,11 +12,7 @@ export default function App(){
   const categories=["温泉","料理","ねこ","技術","日常"]
 
   return(
-    <div style={{
-      maxWidth: "1920px",
-      margin: "0 auto",
-      padding: "1rem"
-    }}>
+    <div>
       {/*ヘッダー*/}
       <header style={{padding:"1rem",background:"#f0f0f0"}}>
         <h1>My Blog</h1>
