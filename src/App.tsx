@@ -13,7 +13,7 @@ export default function App(){
 
   return(
     <div style={{
-      maxWidth: "800px",
+      maxWidth: "1920px",
       margin: "0 auto",
       padding: "1rem"
     }}>
