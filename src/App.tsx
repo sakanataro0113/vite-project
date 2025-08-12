@@ -20,7 +20,7 @@ export default function App(){
       {/*ヘッダー*/}
       <header style={{padding:"1rem",background:"#f0f0f0"}}>
         <h1>My Blog</h1>
-        <nav style={{display:"flex",gap:"1rem"}}>
+        <nav style={{display:"flex",gap:"1rem",justifyContent: "center"}}>
           <Link to="/">ホーム</Link>
           {categories.map(cat=>(
             <Link key={cat} to={`/category/${cat}`}>{cat}</Link>
