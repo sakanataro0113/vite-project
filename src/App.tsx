@@ -1,35 +1,42 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import {Routes,Route,Link} from 'react-router-dom'
 
-function App() {
-  const [count] = useState(0)
-
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>こんにちは</h1>
-      <div className="card">
-        <button onClick={() => console.log("こんにちは！")}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+function Home(){
+  return <h2>ブログのトップページ(記事一覧予定)</h2>
 }
 
-export default App
+function Category({name}:{name:string}){
+  return <h2>{name}のページ</h2>
+}
+
+export default function App(){
+  const categories=["温泉","料理","ねこ","技術","日常"]
+
+  return(
+    <div>
+      {/*ヘッダー*/}
+      <header style={{padding:"1rem",background:"#f0f0f0"}}>
+        <h1>My Blog</h1>
+        <nav style={{display:"flex",gap:"1rem"}}>
+          <Link to="/">ホーム</Link>
+          {categories.map(cat=>(
+            <Link key={cat} to={`/category/${cat}`}>{cat}</Link>
+          ))}
+        </nav>
+      </header>
+
+      {/*ページ切り替え */}
+      <main style={{padding:"1rem"}}>
+        <Routes>
+          <Route path='/' element={<Home/>}/>
+          {categories.map(cat=>(
+              <Route
+                key={cat}
+                path={`/category/${cat}`}
+                element={<Category name={cat}/>}
+              />
+          ))}
+        </Routes>
+      </main>
+    </div>
+  )
+}
