@@ -1,4 +1,5 @@
 import {Routes,Route,Link} from 'react-router-dom'
+import TitleCard from './category/title_card.tsx';
 
 function Home(){
   return <h2>ブログのトップページ(記事一覧予定)</h2>
@@ -18,9 +19,9 @@ export default function App(){
         <h1>My Blog</h1>
         <nav style={{display:"flex",gap:"1rem",justifyContent: "center"}}>
           <Link to="/">ホーム</Link>
-          {categories.map(cat=>(
+          {/*{categories.map(cat=>(
             <Link key={cat} to={`/category/${cat}`}>{cat}</Link>
-          ))}
+          ))}*/}
         </nav>
       </header>
 
@@ -36,6 +37,11 @@ export default function App(){
               />
           ))}
         </Routes>
+        <div className='cardlist'>
+          {categories.map((cat)=>(
+            <TitleCard key={cat} category={cat}/>
+          ))}
+        </div>
       </main>
     </div>
   )
