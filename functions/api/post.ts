@@ -17,7 +17,7 @@ type PostData={
 };
 
 //POSTリクエストで投稿を保存
-app.post('/api/post',async(c)=>{
+app.post('/',async(c)=>{
     const body=await c.req.json<PostData>();
 
     const{title, category, image_url, content } = body;
@@ -39,7 +39,7 @@ app.post('/api/post',async(c)=>{
 })
 
 //GETリクエストで投稿一覧を取得
-app.get('/api/post',async(c)=>{
+app.get('/',async(c)=>{
     try{
         const{results}=await c.env.DB.prepare(
             `SELECT id, title, category, image_url, content, created_at
@@ -60,6 +60,7 @@ app.get('/api/post',async(c)=>{
 
 
 export default app;
+export type {PostData};
 
 
 
