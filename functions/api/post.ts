@@ -2,14 +2,11 @@
 import {Hono} from 'hono'
 import type { D1Database } from '@cloudflare/workers-types';
 
-type Bindings={
-    DB: D1Database;
-}
-
 const app=new Hono<{Bindings:{DB:D1Database}}>();
 
 //postリクエストデータ
 type PostData={
+    id:number;
     title:string;
     category:string;
     image_url:string;
