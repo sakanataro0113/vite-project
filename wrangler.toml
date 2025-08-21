@@ -1,0 +1,4 @@
+[[d1_databases]]
+binding = "DB"  
+database_name = "my_blog_db"
+database_id = "2ed1b42f-2615-44e9-8528-8477843bebd6"
