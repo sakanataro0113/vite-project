@@ -8,7 +8,7 @@ type TitleCardProps={
 const TitleCard:React.FC<TitleCardProps>=({category})=>{
     return(
         <div className="category-card">
-            <Link to={`/category/${category}`}>{category}</Link>
+            <Link to={`/category/${category}`}>{category}のページ</Link>
         </div>
     );
 };
