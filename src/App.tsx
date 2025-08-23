@@ -41,7 +41,7 @@ export default function App(){
 
           {categories.map((cat)=>(
             <div key={cat}>
-              <Link  to={'/category/'+cat}></Link>
+              <Link  to={'/category/'+cat}>{cat}のページ</Link>
               <TitleCard category={cat}/>
             </div>
           ))}
