@@ -38,8 +38,12 @@ export default function App(){
           ))}
         </Routes>
         <div className='cardlist'>
+
           {categories.map((cat)=>(
-            <TitleCard key={cat} category={cat}/>
+            <div key={cat}>
+              <Link  to={'/category/'+cat}></Link>
+              <TitleCard category={cat}/>
+            </div>
           ))}
         </div>
       </main>
