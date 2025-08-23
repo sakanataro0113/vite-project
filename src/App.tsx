@@ -5,10 +5,6 @@ function Home(){
   return <h2>ブログのトップページ(記事一覧予定)</h2>
 }
 
-function Category({name}:{name:string}){
-  return <h2>{name}のページ</h2>
-}
-
 export default function App(){
   const categories=["温泉","料理","ねこ","技術","日常"]
 
@@ -33,7 +29,7 @@ export default function App(){
               <Route
                 key={cat}
                 path={`/category/${cat}`}
-                element={<Category name={cat}/>}
+                element={<TitleCard category={cat}/>}
               />
           ))}
         </Routes>
