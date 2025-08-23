@@ -15,9 +15,9 @@ export default function App(){
         <h1>My Blog</h1>
         <nav style={{display:"flex",gap:"1rem",justifyContent: "center"}}>
           <Link to="/">ホーム</Link>
-          {/*{categories.map(cat=>(
+          {categories.map(cat=>(
             <Link key={cat} to={`/category/${cat}`}>{cat}</Link>
-          ))}*/}
+          ))}
         </nav>
       </header>
 
@@ -33,14 +33,6 @@ export default function App(){
               />
           ))}
         </Routes>
-        <div className='cardlist'>
-
-          {categories.map((cat)=>(
-            <div key={cat}>
-              <Link  to={'/category/'+cat}>{cat}のページ</Link>
-            </div>
-          ))}
-        </div>
       </main>
     </div>
   )
