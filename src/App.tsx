@@ -1,5 +1,6 @@
 import {Routes,Route,Link} from 'react-router-dom'
 import TitleCard from './category/title_card.tsx';
+import PostForm from './components/PostForm.tsx';
 
 function Home(){
   return <h2>ブログのトップページ(記事一覧予定)</h2>
@@ -33,6 +34,7 @@ export default function App(){
               />
           ))}
         </Routes>
+        <PostForm/>
       </main>
     </div>
   )
