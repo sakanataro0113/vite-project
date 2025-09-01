@@ -5,7 +5,7 @@ export default function PostForm(){
     const[category,setCategory]=useState("");
     const[content,setContent]=useState("");
 
-    const handleSubmit=async(e:React.FormEvent)=>{
+    const handleSubmit=async(e:React.FormEvent)=>{ //投稿ボタンを押したときに実行される関数
         e.preventDefault();
 
         //APIに送信

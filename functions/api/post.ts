@@ -9,7 +9,7 @@ type PostData={
     id:number;
     title:string;
     category:string;
-    image_url:string;
+    image_url?:string;
     content:string;
 };
 
