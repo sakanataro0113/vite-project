@@ -4,6 +4,7 @@ export default function PostForm(){
     const[title,setTitle]=useState("");
     const[category,setCategory]=useState("");
     const[content,setContent]=useState("");
+    const categories=["温泉","料理","ねこ","技術","日常"]
 
     const handleSubmit=async(e:React.FormEvent)=>{ //投稿ボタンを押したときに実行される関数
         e.preventDefault();
@@ -42,15 +43,19 @@ export default function PostForm(){
                 required
             />
 
-            <input
-                type='text'
-                placeholder='カテゴリ'
+            <select //カテゴリ
                 value={category}
                 onChange={(e)=>setCategory(e.target.value)}
                 className='border p-2 rounded'
                 required
-            />
-
+            >
+                <option value="" disabled>カテゴリを選択してください</option>
+                {categories.map((cat)=>(
+                    <option key={cat} value={cat}>
+                        {cat}
+                    </option>
+                ))}
+            </select>
             <textarea
                 placeholder='本文'
                 value={content}
