@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import { serveStatic } from 'hono/cloudflare-pages';
 import type { D1Database } from '@cloudflare/workers-types';
 
 // --- 型定義 ---
@@ -120,14 +121,13 @@ app.get('/api/post', async (c) => {
 });
 
 /**
- * API以外のすべてのGETリクエストを処理します。
- * これにより、ViteでビルドされたReactアプリ本体が正しくブラウザに表示されます。
- * * c.env.next()は、このリクエストの処理をCloudflare Pagesの
- * 静的アセットハンドラに引き渡すための特殊な関数です。
+ * API以外のすべてのリクエストを処理します。
+ * HonoのserveStaticミドルウェアが、リクエストに一致する静的ファイルを
+ * `dist`フォルダから自動的に探して返してくれます。
+ * これにより、Reactアプリが表示されるようになります。
  */
-app.get('*', (c) => {
-  return c.env.next(c.req.raw);
-});
+app.get('*', serveStatic());
+
 
 // Honoアプリケーションをエクスポート
 export default app;
