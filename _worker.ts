@@ -29,7 +29,21 @@ type PostData = {
 
 // --- Honoアプリケーションの作成 ---
 
-const app = new Hono<{ Bindings: Bindings }>();
+// Cloudflare Pagesが提供する機能（nextなど）の型
+type Platform = {
+  next: (request: Request) => Response | Promise<Response>;
+};
+
+// Honoに渡す、私たちのBindingsとPlatformを結合した完全な環境の型
+type Env = {
+  Bindings: {
+    DB: D1Database;
+  } & Platform; // ここで型を結合
+};
+
+// --- Honoアプリケーションの作成 ---
+
+const app = new Hono<Env>(); // 修正したEnv型を使用
 
 // --- APIルートの定義 ---
 
@@ -103,6 +117,16 @@ app.get('/api/post', async (c) => {
     // 5. エラーが発生した場合のレスポンスを返す
     return c.json({ success: false, error: 'Failed to fetch posts' }, 500);
   }
+});
+
+/**
+ * API以外のすべてのGETリクエストを処理します。
+ * これにより、ViteでビルドされたReactアプリ本体が正しくブラウザに表示されます。
+ * * c.env.next()は、このリクエストの処理をCloudflare Pagesの
+ * 静的アセットハンドラに引き渡すための特殊な関数です。
+ */
+app.get('*', (c) => {
+  return c.env.next(c.req.raw);
 });
 
 // Honoアプリケーションをエクスポート
