@@ -10,7 +10,7 @@ export default function PostForm(){
         e.preventDefault();
 
         //APIに送信
-        const res=await fetch("/api/test",{ //post→test
+        const res=await fetch("/api/post",{ 
             method:"POST",
             headers:{
                 "Content-Type":"application/json",
