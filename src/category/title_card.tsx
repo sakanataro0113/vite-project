@@ -29,7 +29,7 @@ const TitleCard:React.FC<TitleCardProps>=({category})=>{
                 <p>このカテゴリの記事はまだありません。</p>
             ):(
                 filteredPosts.map(post=>(
-                    <div key={post.category} className="category-card">
+                    <div key={post.category} className="category-card border rounded-lg p-4 shadow-md mb-4">
                         <h2>{post.title}</h2>
                         <p>{post.content.slice(0,50)}</p>
                         <Link to={`/post/${post.category}`}>続きを読む</Link>
