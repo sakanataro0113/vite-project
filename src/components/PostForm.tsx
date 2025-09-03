@@ -34,28 +34,30 @@ export default function PostForm(){
 
     return(
         <form onSubmit={handleSubmit} className='flex flex-col gap-4 p-4 max-w-md mx-auto'>
-            <input
-                type='text'
-                placeholder='タイトル'
-                value={title}
-                onChange={(e)=>setTitle(e.target.value)}
-                className="border p-2 rounded"
-                required
-            />
+            <div className='flex w-full gap-4'>
+                <input
+                    type='text'
+                    placeholder='タイトル'
+                    value={title}
+                    onChange={(e)=>setTitle(e.target.value)}
+                    className="w-1/2 border p-2 rounded"
+                    required
+                />
 
-            <select //カテゴリ
-                value={category}
-                onChange={(e)=>setCategory(e.target.value)}
-                className='border p-2 rounded'
-                required
-            >
-                <option value="" disabled>カテゴリを選択してください</option>
-                {categories.map((cat)=>(
-                    <option key={cat} value={cat}>
-                        {cat}
+                <select //カテゴリ
+                    value={category}
+                    onChange={(e)=>setCategory(e.target.value)}
+                    className='w-1/2 border p-2 rounded'
+                    required
+                >
+                    <option value="" disabled>カテゴリを選択してください</option>
+                    {categories.map((cat)=>(
+                        <option key={cat} value={cat}>
+                            {cat}
                     </option>
-                ))}
-            </select>
+                    ))}
+                </select>
+            </div>
             <textarea
                 placeholder='本文'
                 value={content}
