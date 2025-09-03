@@ -33,36 +33,34 @@ export default function PostForm(){
     };
 
     return(
-        <form onSubmit={handleSubmit} className='flex flex-col gap-4 p-4 max-w-md mx-auto'>
-            <div className='flex w-full gap-4'>
-                <input
-                    type='text'
-                    placeholder='タイトル'
-                    value={title}
-                    onChange={(e)=>setTitle(e.target.value)}
-                    className="w-1/2 border p-2 rounded"
-                    required
-                />
+        <form onSubmit={handleSubmit} className='flex flex-wrap gap-4 p-4 max-w-md mx-auto'>
+            <input
+                type='text'
+                placeholder='タイトル'
+                value={title}
+                onChange={(e)=>setTitle(e.target.value)}
+                className="flex-1 border p-2 rounded"
+                required
+            />
 
-                <select //カテゴリ
-                    value={category}
-                    onChange={(e)=>setCategory(e.target.value)}
-                    className='w-1/2 border p-2 rounded'
-                    required
-                >
-                    <option value="" disabled>カテゴリを選択してください</option>
-                    {categories.map((cat)=>(
-                        <option key={cat} value={cat}>
-                            {cat}
+            <select //カテゴリ
+                value={category}
+                onChange={(e)=>setCategory(e.target.value)}
+                className='flex-1 border p-2 rounded'
+                required
+            >
+                <option value="" disabled>カテゴリを選択してください</option>
+                {categories.map((cat)=>(
+                    <option key={cat} value={cat}>
+                        {cat}
                     </option>
-                    ))}
-                </select>
-            </div>
+                ))}
+            </select>
             <textarea
                 placeholder='本文'
                 value={content}
                 onChange={(e)=>setContent(e.target.value)}
-                className='border p-2 rounded min-h-[120px]'
+                className='w-full border p-2 rounded min-h-[120px]'
                 required
             />
 
