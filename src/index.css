@@ -62,6 +62,14 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+.category-card {
+  border: 1px solid #e5e7eb; /* 枠線（薄いグレー） */
+  border-radius: 0.5rem;      /* 角丸 */
+  padding: 1rem;              /* 内側の余白 */
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); /* 影 */
+  margin-bottom: 1rem;        /* 下の余白 */
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
