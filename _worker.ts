@@ -1,12 +1,14 @@
 import { Hono } from 'hono';
 import { serveStatic } from 'hono/cloudflare-pages';
-import type { D1Database } from '@cloudflare/workers-types';
+import type { D1Database,R2Bucket } from '@cloudflare/workers-types';
 
 // --- 型定義 ---
 
 // Cloudflareの環境変数（D1データベース）の型
 type Bindings = {
   DB: D1Database;
+  IMAGE_BUCKET:R2Bucket;
+  R2_PUBLIC_URL:string;
 };
 
 // フロントエンドから「送られてくる」投稿データ用の型

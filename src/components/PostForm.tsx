@@ -4,6 +4,8 @@ export default function PostForm(){
     const[title,setTitle]=useState("");
     const[category,setCategory]=useState("");
     const[content,setContent]=useState("");
+    //const[imageFile,setImageFile]=useState<File|null>(null);
+
     const categories=["温泉","料理","ねこ","技術","日常"]
 
     const handleSubmit=async(e:React.FormEvent)=>{ //投稿ボタンを押したときに実行される関数
