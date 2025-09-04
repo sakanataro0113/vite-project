@@ -30,8 +30,8 @@ const TitleCard:React.FC<TitleCardProps>=({category})=>{
             ):(
                 filteredPosts.map(post=>(
                     <div key={post.category} className="category-card border rounded-lg p-4 shadow-md mb-4">
-                        <h2 className='break-words'>{post.title}</h2>
-                        <p className='break-words'>{post.content.slice(0,50)}</p>
+                        <h2 className='w-full break-words'>{post.title}</h2>
+                        <p className='w-full break-words'>{post.content.slice(0,50)}</p>
                         <Link to={`/post/${post.category}`}>続きを読む</Link>
                     </div> 
                 ))
