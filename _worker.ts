@@ -123,6 +123,39 @@ app.get('/api/post', async (c) => {
 });
 
 /**
+ * DELETE /api/post/:id
+ * 指定されたIDの投稿を削除するエンドポイント
+ */
+app.delete('/api/post/:id', async (c) => {
+  try {
+    // 1. URLから削除対象のIDを取得
+    const postId = c.req.param('id');
+    if (!postId) {
+      return c.json({ success: false, error: 'Post ID is required' }, 400);
+    }
+
+    // 2. データベースから該当の投稿を削除
+    const result = await c.env.DB.prepare(
+      `DELETE FROM posts WHERE id = ?`
+    ).bind(postId).run();
+
+    // 3. 削除が成功したか確認
+    if (result.meta.changes > 0) {
+      return c.json({ success: true, message: 'Post deleted successfully' });
+    } else {
+      return c.json({ success: false, error: 'Post not found' }, 404);
+    }
+
+  } catch (err) {
+    console.error(err);
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+    return c.json({ success: false, error: `Failed to delete post: ${errorMessage}` }, 500);
+  }
+});
+
+
+
+/**
  * API以外のすべてのリクエストを処理します。
  * HonoのserveStaticミドルウェアが、リクエストに一致する静的ファイルを
  * `dist`フォルダから自動的に探して返してくれます。

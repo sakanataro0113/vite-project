@@ -19,6 +19,27 @@ const TitleCard:React.FC<TitleCardProps>=({category})=>{
             .then(data=>setPosts((data as ApiResponse).posts));
     },[]);
 
+    // 削除ボタンが押されたときの処理を行う関数
+    const handleDelete = async (postId: number) => {
+        // ユーザーに本当に削除するか確認
+        if (!window.confirm("この記事を本当に削除しますか？")) {
+            return; // キャンセルされたら何もしない
+        }
+
+        // バックエンドの削除APIを呼び出す
+        const res = await fetch(`/api/post/${postId}`, {
+            method: "DELETE",
+        });
+
+        if (res.ok) {
+            alert("記事を削除しました。");
+            // 画面からも削除された記事をリアルタイムで消す
+            setPosts(posts.filter(post => post.id !== postId));
+        } else {
+            alert("記事の削除に失敗しました。");
+        }
+    };
+
     //カテゴリーごとの投稿をフィルタリング
     const filteredPosts=posts.filter(post=>post.category===category);
 
@@ -37,6 +58,12 @@ const TitleCard:React.FC<TitleCardProps>=({category})=>{
                         <h2 className='w-full break-words'>{post.title}</h2>
                         <p className='w-full break-words'>{post.content.slice(0,50)}</p>
                         <Link to={`/post/${post.category}`}>続きを読む</Link>
+                        <button
+                            onClick={() => handleDelete(post.id)}
+                            className="bg-red-500 text-white py-1 px-3 rounded hover:bg-red-600"
+                        >
+                            削除
+                        </button>
                     </div> 
                 ))
             )}
