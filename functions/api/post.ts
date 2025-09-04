@@ -11,6 +11,7 @@ type PostData={
     category:string;
     image_url?:string;
     content:string;
+    created_at:string; // 追加
 };
 
 //POSTリクエストで投稿を保存

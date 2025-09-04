@@ -43,6 +43,7 @@ export default function PostForm(){
                 onChange={(e)=>setTitle(e.target.value)}
                 className="flex-1 border p-2 rounded"
                 required
+                maxLength={60}
             />
 
             <select //カテゴリ
