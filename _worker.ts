@@ -62,7 +62,10 @@ app.post('/api/post', async (c) => {
     // 2. データを取り出し、image_urlがなければnullを設定
     const { title, category, image_url = null, content } = body;
 
-    // 3. バリデーション：必須項目が空でないかチェック
+    // 3. バリデーション：必須項目が空でないか&タイトルの文字数チェック
+    if (title && title.length > 60) {
+      return c.json({ success: false, error: 'タイトルは60文字以内で入力してください。' }, 400);
+    }
     if (!title || !content || !category) {
       return c.json({ success: false, error: 'Title, content, and category are required' }, 400);
     }
