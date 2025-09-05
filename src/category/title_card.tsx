@@ -25,10 +25,15 @@ const TitleCard:React.FC<TitleCardProps>=({category})=>{
         if (!window.confirm("この記事を本当に削除しますか？")) {
             return; // キャンセルされたら何もしない
         }
+        const password=window.prompt("削除するにはパスワードを入力してください：");
+        if (password === null || password === "") return;
 
         // バックエンドの削除APIを呼び出す
         const res = await fetch(`/api/post/${postId}`, {
             method: "DELETE",
+            headers:{
+                'X-Auth-Password':password,
+            },
         });
 
         if (res.ok) {

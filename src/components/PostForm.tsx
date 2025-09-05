@@ -5,6 +5,7 @@ export default function PostForm(){
     const[category,setCategory]=useState("");
     const[content,setContent]=useState("");
     //const[imageFile,setImageFile]=useState<File|null>(null);
+    const[password,setPassword]=useState("");
 
     const categories=["温泉","料理","ねこ","技術","日常"]
 
@@ -21,6 +22,7 @@ export default function PostForm(){
                 title,
                 category,
                 content,
+                password,
             }),
         });
 
@@ -43,7 +45,7 @@ export default function PostForm(){
                 onChange={(e)=>setTitle(e.target.value)}
                 className="flex-1 border p-2 rounded"
                 required
-                maxLength={60}
+                maxLength={30}
             />
 
             <select //カテゴリ
@@ -64,6 +66,15 @@ export default function PostForm(){
                 value={content}
                 onChange={(e)=>setContent(e.target.value)}
                 className='w-full border p-2 rounded min-h-[120px]'
+                required
+            />
+            {/* 4. パスワード入力欄をフォームに追加 */}
+            <input
+                type="password"
+                placeholder="パスワード"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="border p-2 rounded"
                 required
             />
 

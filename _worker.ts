@@ -9,6 +9,7 @@ type Bindings = {
   DB: D1Database;
   IMAGE_BUCKET:R2Bucket;
   R2_PUBLIC_URL:string;
+  SECRET_KEY:string;
 };
 
 // フロントエンドから「送られてくる」投稿データ用の型
@@ -18,6 +19,7 @@ type PostRequestBody = {
   category: string;
   image_url?: string; // '?' は、この項目がなくても良いことを示す
   content: string;
+  password:string;
 };
 
 // データベースから「取得した」完全な投稿データ用の型
@@ -41,6 +43,9 @@ type Platform = {
 type Env = {
   Bindings: {
     DB: D1Database;
+    IMAGE_BUCKET: R2Bucket;     // ← 追加
+    R2_PUBLIC_URL: string;      // ← 追加
+    SECRET_KEY: string;         // ← 追加
   } & Platform; // ここで型を結合
 };
 
@@ -59,11 +64,16 @@ app.post('/api/post', async (c) => {
     // 1. フロントエンドから送られてきたJSONデータをパース
     const body = await c.req.json<PostRequestBody>();
 
+    //パスワードチェック
+    if (!body.password || body.password !== c.env.SECRET_KEY) {
+      return c.json({ success: false, error: 'Unauthorized' }, 401);
+    }
+
     // 2. データを取り出し、image_urlがなければnullを設定
     const { title, category, image_url = null, content } = body;
 
     // 3. バリデーション：必須項目が空でないか&タイトルの文字数チェック
-    if (title && title.length > 60) {
+    if (title && title.length > 30) {
       return c.json({ success: false, error: 'タイトルは60文字以内で入力してください。' }, 400);
     }
     if (!title || !content || !category) {
@@ -131,6 +141,11 @@ app.get('/api/post', async (c) => {
  */
 app.delete('/api/post/:id', async (c) => {
   try {
+    // ヘッダーからパスワードを取得
+    const password = c.req.header('X-Auth-Password');
+    if (!password || password !== c.env.SECRET_KEY) {
+      return c.json({ success: false, error: 'Unauthorized' }, 401);
+    }
     // 1. URLから削除対象のIDを取得
     const postId = c.req.param('id');
     if (!postId) {
