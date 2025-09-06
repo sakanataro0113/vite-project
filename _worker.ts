@@ -135,6 +135,28 @@ app.get('/api/post', async (c) => {
   }
 });
 
+app.get('/api/post/:id', async (c) => {
+  try {
+    const postId = c.req.param('id');
+    
+    // データベースからIDが一致する投稿を1件だけ探す
+    const post = await c.env.DB.prepare(
+      `SELECT * FROM posts WHERE id = ?`
+    ).bind(postId).first();
+
+    if (post) {
+      return c.json({ success: true, post: post });
+    } else {
+      return c.json({ success: false, error: 'Post not found' }, 404);
+    }
+
+  } catch (err) {
+    console.error(err);
+    return c.json({ success: false, error: 'Failed to fetch post' }, 500);
+  }
+});
+
+
 /**
  * DELETE /api/post/:id
  * 指定されたIDの投稿を削除するエンドポイント
