@@ -1,5 +1,6 @@
 import {Routes,Route,Link} from 'react-router-dom'
 import TitleCard from './category/title_card.tsx';
+import PostDetailPage from './components/PostDetailPage.tsx';
 import PostForm from './components/PostForm.tsx';
 
 function Home(){
@@ -33,6 +34,7 @@ export default function App(){
                 element={<TitleCard category={cat}/>}
               />
           ))}
+          <Route path="/post/:id" element={<PostDetailPage />} />
         </Routes>
         <PostForm/>
       </main>
