@@ -70,8 +70,12 @@ button:focus-visible {
   margin-bottom: 1rem;        /* 下の余白 */
 }
 
-.force-color {
-  color-scheme: light;
+.force-bg-blue {
+  background-color: #3b82f6 !important; /* bg-blue-500の色 */
+}
+
+.force-bg-blue:hover {
+  background-color: #2563eb !important; /* bg-blue-600の色 */
 }
 
 @media (prefers-color-scheme: light) {
