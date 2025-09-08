@@ -71,11 +71,11 @@ button:focus-visible {
 }
 
 .force-bg-gray {
-  background-color: #f0f0f0 !important; 
+  background-color: #839be9 !important; 
 }
 
 .force-bg-gray:hover {
-  background-color:  #dcdcdc !important; 
+  background-color:  #494993 !important; 
 }
 
 @media (prefers-color-scheme: light) {
