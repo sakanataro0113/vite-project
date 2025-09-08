@@ -62,7 +62,7 @@ const TitleCard:React.FC<TitleCardProps>=({category})=>{
                         <p>記事ID: {post.id}</p>
                         <h2 className='w-full break-words'>{post.title}</h2>
                         <p className='w-full break-words'>{post.content.slice(0,50)}</p>
-                        <Link to={`/post/${post.category}`}>続きを読む</Link>
+                        <Link to={`/post/${post.id}`}>続きを読む</Link>
                         <button
                             onClick={() => handleDelete(post.id)}
                             className="bg-red-500 text-white py-1 px-3 rounded hover:bg-red-600"
