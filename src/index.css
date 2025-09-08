@@ -70,6 +70,10 @@ button:focus-visible {
   margin-bottom: 1rem;        /* 下の余白 */
 }
 
+.force-color {
+  color-scheme: light;
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
