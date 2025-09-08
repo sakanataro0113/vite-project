@@ -80,7 +80,7 @@ export default function PostForm(){
 
             <button
                 type='submit'
-                className='force-bg-gray text-white py-2 rounded'
+                className='force-bg-gray text-black py-2 rounded'
             >
             投稿
             </button>
