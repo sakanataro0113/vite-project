@@ -30,6 +30,8 @@ export default function PostForm(){
             alert("投稿が保存されました!");
             setTitle("");
             setCategory("");
+            setContent("");
+            setPassword("");
         }else{
             const err=await res.text();
             alert("エラー:"+err);
