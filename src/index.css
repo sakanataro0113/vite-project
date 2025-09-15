@@ -78,6 +78,23 @@ button:focus-visible {
   background-color:  #494993 !important; 
 }
 
+.article-image {
+  /* --- スマホでの表示（デフォルト） --- */
+  display: block;
+  width: 80%;
+  margin-left: auto;
+  margin-right: auto;
+  height: auto;
+  border-radius: 0.5rem; /* 角丸 */
+}
+
+/* --- PCでの表示（画面幅が768px以上の場合） --- */
+@media (min-width: 768px) {
+  .article-image {
+    width: 50%;
+  }
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;

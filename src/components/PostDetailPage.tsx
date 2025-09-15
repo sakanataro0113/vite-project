@@ -49,8 +49,7 @@ export default function PostDetailPage() {
             <img 
             src={post.image_url} 
             alt={post.title} 
-            width="50%"
-            height="auto"
+            className='article-image'
             />
           </div>
         )}
