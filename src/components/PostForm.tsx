@@ -4,7 +4,7 @@ export default function PostForm(){
     const[title,setTitle]=useState("");
     const[category,setCategory]=useState("");
     const[content,setContent]=useState("");
-    //const[imageFile,setImageFile]=useState<File|null>(null);
+    const[imageFile,setImageFile]=useState<File|null>(null);
     const[password,setPassword]=useState("");
 
     const categories=["温泉","料理","ねこ","技術","日常"]
@@ -12,18 +12,21 @@ export default function PostForm(){
     const handleSubmit=async(e:React.FormEvent)=>{ //投稿ボタンを押したときに実行される関数
         e.preventDefault();
 
-        //APIに送信
+        //FormDataオブジェクトを作成
+        const formData=new FormData();
+        formData.append('title',title);
+        formData.append('category', category);
+        formData.append('content', content);
+        formData.append('password', password);
+
+        //もし画像ファイルが選択されていたらformDataに追加
+        if(imageFile){
+            formData.append('image',imageFile);
+        }
+        //APIにformData送信
         const res=await fetch("/api/post",{ 
             method:"POST",
-            headers:{
-                "Content-Type":"application/json",
-            },
-            body:JSON.stringify({
-                title,
-                category,
-                content,
-                password,
-            }),
+            body:formData,
         });
 
         if(res.ok){
@@ -63,6 +66,24 @@ export default function PostForm(){
                     </option>
                 ))}
             </select>
+            <div>
+                <label htmlFor="image-upload" className="block text-sm font-medium text-gray-700">
+                    アイキャッチ画像（任意）
+                </label>
+                <input
+                    id="image-upload"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                        if (e.target.files && e.target.files[0]) {
+                            setImageFile(e.target.files[0]);
+                        } else {
+                            setImageFile(null);
+                        }
+                    }}
+                    className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                />
+            </div>
             <textarea
                 placeholder='本文'
                 value={content}

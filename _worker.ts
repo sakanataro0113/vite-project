@@ -62,19 +62,40 @@ const app = new Hono<Env>(); // 修正したEnv型を使用
 app.post('/api/post', async (c) => {
   try {
     // 1. フロントエンドから送られてきたJSONデータをパース
-    const body = await c.req.json<PostRequestBody>();
+    //const body = await c.req.json<PostRequestBody>();
+
+    //1.formDataとしてデータを受け取る
+    const formData=await c.req.formData();
+    const password=formData.get("password") as string;
 
     //パスワードチェック
-    if (!body.password || body.password !== c.env.SECRET_KEY) {
+    if (password !== c.env.SECRET_KEY) {
       return c.json({ success: false, error: 'Unauthorized' }, 401);
     }
 
     // 2. データを取り出し、image_urlがなければnullを設定
-    const { title, category, image_url = null, content } = body;
+    //const { title, category, image_url = null, content } = body;
+
+    const title=formData.get('title') as string;
+    const category = formData.get('category') as string;
+    const content = formData.get('content') as string;
+    const imageFile = formData.get('image');
+
+    let image_url:string|null=null;
+
+    //もし画像ファイルがあればR2に保存
+    if(imageFile instanceof File&&imageFile.size>0){
+      const imageBuffer=await imageFile.arrayBuffer();
+      const fileName=`${Date.now()}-${imageFile.name}`;
+      await c.env.IMAGE_BUCKET.put(fileName,imageBuffer);
+
+      const r2PublicUrl=c.env.R2_PUBLIC_URL;
+      image_url=`${r2PublicUrl}/${fileName}`;
+    }
 
     // 3. バリデーション：必須項目が空でないか&タイトルの文字数チェック
     if (title && title.length > 30) {
-      return c.json({ success: false, error: 'タイトルは60文字以内で入力してください。' }, 400);
+      return c.json({ success: false, error: 'タイトルは30文字以内で入力してください。' }, 400);
     }
     if (!title || !content || !category) {
       return c.json({ success: false, error: 'Title, content, and category are required' }, 400);
@@ -84,12 +105,12 @@ app.post('/api/post', async (c) => {
     const created_at = new Date().toISOString();
 
     // 5. データベースにデータを挿入
-    await c.env.DB.prepare(
+    const newPost=await c.env.DB.prepare(
       `INSERT INTO posts (title, category, image_url, content, created_at) VALUES (?, ?, ?, ?, ?)`
-    ).bind(title, category, image_url, content, created_at).run();
+    ).bind(title, category, image_url, content, created_at).first();
 
     // 6. 成功のレスポンスを返す（201 Created）
-    return c.json({ success: true, message: 'Post saved successfully' }, 201);
+    return c.json({ success: true, message: 'Post saved successfully',post:newPost }, 201);
 
   } catch (err) {
     console.error(err);
