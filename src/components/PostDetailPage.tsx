@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link ,useNavigate } from 'react-router-dom';
 import type { PostData } from '../../functions/api/post.ts';
 
 export default function PostDetailPage() {
@@ -9,6 +9,15 @@ export default function PostDetailPage() {
 
   // URLから記事のIDを取得する
   const { id } = useParams<{ id: string }>();
+
+  //useNavigateフックを呼び出す
+  const navigate=useNavigate();
+
+  //navigateの関数
+  const handleGoBack=(e:React.MouseEvent<HTMLAnchorElement>)=>{
+    e.preventDefault();
+    navigate(-1);
+  };
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -40,7 +49,7 @@ export default function PostDetailPage() {
         <h1 className="text-3xl md:text-4xl font-bold mb-2">{post.title}</h1>
         <div className="text-sm text-gray-500 mb-4">
           <span>カテゴリ: </span>
-          <Link to={`/category/${post.category}`} className="font-semibold hover:underline">{post.category}</Link>
+          <Link to="#" onClick={handleGoBack} className="font-semibold hover:underline"></Link>
           <span className="mx-2">|</span>
           <span>作成日時: {new Date(post.created_at).toLocaleString()}</span>
         </div>
