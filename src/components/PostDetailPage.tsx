@@ -35,7 +35,7 @@ export default function PostDetailPage() {
 
   return (
     <div className="p-4 md:p-8">
-      <Link to="/" className="text-blue-500 hover:underline mb-4 inline-block">&larr; 記事一覧に戻る</Link>
+      <Link to="/category/" className="text-blue-500 hover:underline mb-4 inline-block">&larr; 記事一覧に戻る</Link>
       <article>
         <h1 className="text-3xl md:text-4xl font-bold mb-2">{post.title}</h1>
         <div className="text-sm text-gray-500 mb-4">
@@ -45,7 +45,7 @@ export default function PostDetailPage() {
           <span>作成日時: {new Date(post.created_at).toLocaleString()}</span>
         </div>
         {post.image_url && (
-          <img src={post.image_url} alt={post.title} className="w-full max-w-3xl h-auto object-cover rounded-lg my-4" />
+          <img src={post.image_url} alt={post.title} className="max-w-3xl mx-auto h-auto object-cover rounded-lg my-4" />
         )}
         {/* 改行を<br>タグに変換して表示 */}
         <div className="prose lg:prose-xl max-w-none mt-8">
