@@ -66,8 +66,7 @@ const TitleCard:React.FC<TitleCardProps>=({category})=>{
                             <img
                                 src={post.image_url}
                                 alt={post.title}
-                                width="80%"
-                                height="auto"
+                                className='article-image'
                             />
                         )}
                         <p className='w-full break-words'>{post.content.slice(0,50)}</p>
