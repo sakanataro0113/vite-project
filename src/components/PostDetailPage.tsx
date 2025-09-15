@@ -44,12 +44,12 @@ export default function PostDetailPage() {
 
   return (
     <div className="p-4 md:p-8">
-      <Link to="/category/" className="text-blue-500 hover:underline mb-4 inline-block">&larr; 記事一覧に戻る</Link>
+      <Link to="#" onClick={handleGoBack} className="text-blue-500 hover:underline mb-4 inline-block">&larr; 記事一覧に戻る</Link>
       <article>
         <h1 className="text-3xl md:text-4xl font-bold mb-2">{post.title}</h1>
         <div className="text-sm text-gray-500 mb-4">
           <span>カテゴリ: </span>
-          <Link to="#" onClick={handleGoBack} className="font-semibold hover:underline"></Link>
+          <Link to={`/category/${post.category}`} className="font-semibold hover:underline">{post.category}</Link>
           <span className="mx-2">|</span>
           <span>作成日時: {new Date(post.created_at).toLocaleString()}</span>
         </div>
