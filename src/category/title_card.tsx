@@ -55,7 +55,7 @@ const TitleCard:React.FC<TitleCardProps>=({category})=>{
                 <p>このカテゴリの記事はまだありません。</p>
             ):(
                 filteredPosts.map(post=>(
-                    <div key={post.category} className="category-card border rounded-lg p-4 shadow-md mb-4">
+                    <div key={post.id} className="category-card border rounded-lg p-4 shadow-md mb-4">
                         {/* ↓↓ 作成日時を表示 ↓↓ */}
                         <p>作成日時: {new Date(post.created_at).toLocaleString()}</p>
                         {/* ↓↓ IDを表示 ↓↓ */}
