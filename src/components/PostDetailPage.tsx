@@ -45,11 +45,11 @@ export default function PostDetailPage() {
           <span>作成日時: {new Date(post.created_at).toLocaleString()}</span>
         </div>
         {post.image_url && (
-          <div className="flex justify-center my-4">
+          <div className="w-full my-4">
             <img 
             src={post.image_url} 
             alt={post.title} 
-            className="max-w-3xl h-auto object-cover rounded-lg" 
+            className="w-full max-w-3xl mx-auto block h-auto object-cover rounded-lg" 
             />
           </div>
         )}
