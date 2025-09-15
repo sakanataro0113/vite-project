@@ -56,6 +56,15 @@ const TitleCard:React.FC<TitleCardProps>=({category})=>{
             ):(
                 filteredPosts.map(post=>(
                     <div key={post.category} className="category-card border rounded-lg p-4 shadow-md mb-4">
+                        {/*imageが存在するときに表示 */}
+                        {post.image_url&&(
+                            <img
+                                src='{post.image_url}'
+                                alt='{post.title}'
+                                width="80%"
+                                height="auto"
+                            />
+                        )}
                         {/* ↓↓ 作成日時を表示 ↓↓ */}
                         <p>作成日時: {new Date(post.created_at).toLocaleString()}</p>
                         {/* ↓↓ IDを表示 ↓↓ */}
