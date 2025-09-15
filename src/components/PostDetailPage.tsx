@@ -45,7 +45,13 @@ export default function PostDetailPage() {
           <span>作成日時: {new Date(post.created_at).toLocaleString()}</span>
         </div>
         {post.image_url && (
-          <img src={post.image_url} alt={post.title} className="max-w-3xl mx-auto h-auto object-cover rounded-lg my-4" />
+          <div className="flex justify-center my-4">
+            <img 
+            src={post.image_url} 
+            alt={post.title} 
+            className="max-w-3xl h-auto object-cover rounded-lg" 
+            />
+          </div>
         )}
         {/* 改行を<br>タグに変換して表示 */}
         <div className="prose lg:prose-xl max-w-none mt-8">
