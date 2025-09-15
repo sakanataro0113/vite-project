@@ -56,20 +56,20 @@ const TitleCard:React.FC<TitleCardProps>=({category})=>{
             ):(
                 filteredPosts.map(post=>(
                     <div key={post.category} className="category-card border rounded-lg p-4 shadow-md mb-4">
-                        {/*imageが存在するときに表示 */}
-                        {post.image_url&&(
-                            <img
-                                src='{post.image_url}'
-                                alt='{post.title}'
-                                width="80%"
-                                height="auto"
-                            />
-                        )}
                         {/* ↓↓ 作成日時を表示 ↓↓ */}
                         <p>作成日時: {new Date(post.created_at).toLocaleString()}</p>
                         {/* ↓↓ IDを表示 ↓↓ */}
                         <p>記事ID: {post.id}</p>
                         <h2 className='w-full break-words'>{post.title}</h2>
+                        {/*imageが存在するときに表示 */}
+                        {post.image_url&&(
+                            <img
+                                src={post.image_url}
+                                alt={post.title}
+                                width="80%"
+                                height="auto"
+                            />
+                        )}
                         <p className='w-full break-words'>{post.content.slice(0,50)}</p>
                         <Link to={`/post/${post.id}`}>続きを読む</Link>
                         <button
