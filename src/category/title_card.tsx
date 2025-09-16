@@ -46,7 +46,10 @@ const TitleCard:React.FC<TitleCardProps>=({category})=>{
     };
 
     //カテゴリーごとの投稿をフィルタリング
-    const filteredPosts=posts.filter(post=>post.category===category);
+    //const filteredPosts=posts.filter(post=>post.category===category);
+    const filteredPosts=category==="すべての記事"
+        ?posts
+        :posts.filter(post=>post.category===category);
 
     return(
         <div>
