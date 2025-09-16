@@ -7,17 +7,29 @@ import Profile from './components/profile.tsx';
 export default function App(){
   const categories=["温泉","料理","ねこ","技術","日常"]
 
+  //カテゴリを2列に分けたい
+  const firstRow=categories.slice(0,3);
+  const secondRow=categories.slice(3);
+
   return(
     <div>
       {/*ヘッダー*/}
       <header style={{padding:"1rem",background:"#f0f0f0"}}>
         <h1>My Blog</h1>
-        <nav style={{display:"flex",gap:"1rem",justifyContent: "center"}}>
+        <nav style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem" }}>
           <Link to="/">ホーム</Link>
-          {categories.map(cat=>(
-            <Link key={cat} to={`/category/${cat}`}>{cat}</Link>
-          ))}
-          <Link to="/profile">執筆者</Link>
+          {/* 1行目のリンク */}
+          <div style={{ display: "flex", gap: "1rem" }}>
+            {firstRow.map(cat => (
+              <Link key={cat} to={`/category/${cat}`}>{cat}</Link>
+            ))}
+          </div>
+          {/* 2行目のリンク */}
+          <div style={{ display: "flex", gap: "1rem" }}>
+            {secondRow.map(cat => (
+              <Link key={cat} to={`/category/${cat}`}>{cat}</Link>
+            ))}
+          </div>
         </nav>
       </header>
 
