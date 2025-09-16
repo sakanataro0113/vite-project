@@ -3,10 +3,6 @@ import TitleCard from './category/title_card.tsx';
 import PostDetailPage from './components/PostDetailPage.tsx';
 import PostForm from './components/PostForm.tsx';
 
-function Home(){
-  return <h2>ブログのトップページ(記事一覧予定)</h2>
-}
-
 export default function App(){
   const categories=["温泉","料理","ねこ","技術","日常"]
 
