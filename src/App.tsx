@@ -17,7 +17,7 @@ export default function App(){
           {categories.map(cat=>(
             <Link key={cat} to={`/category/${cat}`}>{cat}</Link>
           ))}
-          <Link to="/profile">執筆者プロフィール</Link>
+          <Link to="/profile">執筆者</Link>
         </nav>
       </header>
 
