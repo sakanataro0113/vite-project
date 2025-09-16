@@ -2,6 +2,7 @@ import {Routes,Route,Link} from 'react-router-dom'
 import TitleCard from './category/title_card.tsx';
 import PostDetailPage from './components/PostDetailPage.tsx';
 import PostForm from './components/PostForm.tsx';
+import Profile from './components/profile.tsx';
 
 export default function App(){
   const categories=["温泉","料理","ねこ","技術","日常"]
@@ -16,7 +17,7 @@ export default function App(){
           {categories.map(cat=>(
             <Link key={cat} to={`/category/${cat}`}>{cat}</Link>
           ))}
-          <Link to="/components/profile.tsx">執筆者プロフィール</Link>
+          <Link to="/profile">執筆者プロフィール</Link>
         </nav>
       </header>
 
@@ -32,6 +33,7 @@ export default function App(){
               />
           ))}
           <Route path="/post/:id" element={<PostDetailPage />} />
+          <Route path='/profile' element={<Profile/>}/>
         </Routes>
         <PostForm/>
       </main>

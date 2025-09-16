@@ -1,4 +1,4 @@
-export default function profile(){
+export default function Profile(){
     return (
         <div>
             <h2>ブログ執筆者紹介</h2>
