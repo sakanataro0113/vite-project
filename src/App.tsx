@@ -22,7 +22,7 @@ export default function App(){
       {/*ページ切り替え */}
       <main style={{padding:"1rem"}}>
         <Routes>
-          <Route path='/' element={<TitleCard category="すべての記事" />}/>
+          <Route path='/' element={<TitleCard category="すべて" />}/>
           {categories.map(cat=>(
               <Route
                 key={cat}
