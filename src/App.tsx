@@ -16,6 +16,7 @@ export default function App(){
           {categories.map(cat=>(
             <Link key={cat} to={`/category/${cat}`}>{cat}</Link>
           ))}
+          <Link to="/components/profile.tsx">執筆者プロフィール</Link>
         </nav>
       </header>
 
