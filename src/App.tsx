@@ -7,7 +7,7 @@ import Profile from './components/profile.tsx';
 export default function App(){
   const categories=["温泉","料理","ねこ","技術","日常"]
 
-  //カテゴリを2列に分けたい
+  //カテゴリを2行に分けたい
   const firstRow=categories.slice(0,3);
   const secondRow=categories.slice(3);
 
@@ -17,9 +17,9 @@ export default function App(){
       <header style={{padding:"1rem",background:"#f0f0f0"}}>
         <h1>My Blog</h1>
         <nav style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem" }}>
-          <Link to="/">ホーム</Link>
           {/* 1行目のリンク */}
           <div style={{ display: "flex", gap: "1rem" }}>
+            <Link to="/">ホーム</Link>
             {firstRow.map(cat => (
               <Link key={cat} to={`/category/${cat}`}>{cat}</Link>
             ))}
@@ -29,6 +29,7 @@ export default function App(){
             {secondRow.map(cat => (
               <Link key={cat} to={`/category/${cat}`}>{cat}</Link>
             ))}
+            <Link to="/profile">執筆者</Link>
           </div>
         </nav>
       </header>
