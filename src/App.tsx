@@ -1,5 +1,5 @@
 import {Routes,Route,Link} from 'react-router-dom'
-import {useState,useEffect} from 'react';
+import {useState,useEffect,useRef} from 'react';
 import TitleCard from './category/title_card.tsx';
 import PostDetailPage from './components/PostDetailPage.tsx';
 import PostForm from './components/PostForm.tsx';
@@ -33,6 +33,14 @@ export default function App(){
   const firstRow=categories.slice(0,3);
   const secondRow=categories.slice(3);
 
+  //PostFormコンポーネントのための参照(ref)を作成
+  const postFormRef=useRef<HTMLDivElement>(null);
+
+  //PostFormまでスクロールする関数
+  const scrollToPostForm=()=>{
+    postFormRef.current?.scrollIntoView({behavior:"smooth"});
+  };
+
   return(
     <div>
       {/*ヘッダー*/}
@@ -63,6 +71,7 @@ export default function App(){
           <nav>
             <Link to="/">ホーム</Link>
             <Link to="/profile">プロフィール</Link>
+            <button onClick={scrollToPostForm} className="hover:underline">投稿へ</button>
           </nav>
         </header>
       )}
@@ -81,7 +90,9 @@ export default function App(){
           <Route path="/post/:id" element={<PostDetailPage />} />
           <Route path='/profile' element={<Profile/>}/>
         </Routes>
-        <PostForm/>
+        <div ref={postFormRef}>
+          <PostForm />
+        </div>
       </main>
     </div>
   )
