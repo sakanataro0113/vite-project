@@ -78,6 +78,18 @@ button:focus-visible {
   background-color:  #494993 !important; 
 }
 
+.sticky-header {
+  position: sticky; /* スクロールに追従させる */
+  top: 0;           /* 画面の一番上に固定する */
+  
+  background-color: #f0f0f0; /* 背景色 */
+  padding: 1rem;              /* 内側の余白 */
+  z-index: 10;                /* 他の要素より手前に表示させる */
+  
+  /* コンテンツとの境界を明確にするための影（任意） */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
+}
+
 .article-image {
   /* --- スマホでの表示（デフォルト） --- */
   display: block;

@@ -14,7 +14,7 @@ export default function App(){
   return(
     <div>
       {/*ヘッダー*/}
-      <header className="sticky top-0 bg-gray-100 shadow-md z-10" style={{padding:"1rem",background:"#f0f0f0"}}>
+      <header className="sticky-header" style={{padding:"1rem",background:"#f0f0f0"}}>
         <h1>My Blog</h1>
         <nav style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem" }}>
           {/* 1行目のリンク */}
