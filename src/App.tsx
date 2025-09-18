@@ -4,7 +4,6 @@ import TitleCard from './category/title_card.tsx';
 import PostDetailPage from './components/PostDetailPage.tsx';
 import PostForm from './components/PostForm.tsx';
 import Profile from './components/profile.tsx';
-import { handle } from 'hono/cloudflare-pages';
 
 export default function App(){
   const categories=["温泉","料理","ねこ","技術","日常"]
