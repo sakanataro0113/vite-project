@@ -133,12 +133,9 @@ button:focus-visible {
 }
 
 .sticky-header-inner {
-  max-width: 1024px; /* コンテンツの最大幅を指定 (例: lgサイズ) */
-  margin-left: auto;  /* 左右の余白を自動で設定して中央揃え */
-  margin-right: auto;
-  padding: 0 1.5rem;   /* 左右に余白を設ける */
+  width: 100%;
+  padding: 0 1.5rem;
   
-  /* 中の要素 (タイトルとナビゲーション) を両端に寄せる */
   display: flex;
   justify-content: space-between;
   align-items: center;
