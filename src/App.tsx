@@ -75,12 +75,14 @@ export default function App(){
       {/* ↓↓ スクロールした時にだけ表示されるヘッダーを追加 ↓↓ */}
       {isSticky && (
         <header className="sticky-header">
-          <Link to="/">My Blog</Link>
-          <nav>
-            <Link to="/profile">プロフィール</Link>
-            <button onClick={scrollToPostForm} className="hover:underline">投稿</button>
-            <button onClick={scrollToTop} className="hover:underline">トップ</button>
-          </nav>
+          <div className="sticky-header-inner">
+            <Link to="/">My Blog</Link>
+            <nav>
+              <Link to="/profile">プロフィール</Link>
+              <button onClick={scrollToPostForm} className="hover:underline">投稿</button>
+              <button onClick={scrollToTop} className="hover:underline">トップ</button>
+            </nav>
+          </div>
         </header>
       )}
 
