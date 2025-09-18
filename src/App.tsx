@@ -10,10 +10,14 @@ export default function App(){
 
   //スティッキーヘッダー作成
   const[isSticky,setIsSticky]=useState(false);
+
+  // 1. 通常ヘッダーを測定するためのrefを作成
+  const mainHeaderRef = useRef<HTMLElement>(null);
+
   //スクロールイベントをuseEffectで監視
   useEffect(()=>{
     const handleScroll=()=>{
-      if(window.scrollY>100){
+      if(mainHeaderRef.current && window.scrollY > mainHeaderRef.current.offsetHeight){
         setIsSticky(true);
       }else{
         setIsSticky(false);
@@ -52,7 +56,7 @@ export default function App(){
   return(
     <div>
       {/*ヘッダー*/}
-      <header className="site-header" style={{padding:"1rem",background:"#f0f0f0"}}>
+      <header className="site-header" style={{padding:"1rem",background:"#f0f0f0"}} ref={mainHeaderRef}>
         <h1>My Blog</h1>
         <nav style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem" }}>
           {/* 1行目のリンク */}
@@ -76,9 +80,8 @@ export default function App(){
       {isSticky && (
         <header className="sticky-header">
           <div className="sticky-header-inner">
-            <Link to="/">My Blog</Link>
+            <Link to="/profile">プロフィール</Link>
             <nav>
-              <Link to="/profile">プロフィール</Link>
               <button onClick={scrollToPostForm} className="hover:underline">投稿</button>
               <button onClick={scrollToTop} className="hover:underline">トップ</button>
             </nav>
