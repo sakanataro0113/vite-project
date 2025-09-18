@@ -41,6 +41,14 @@ export default function App(){
     postFormRef.current?.scrollIntoView({behavior:"smooth"});
   };
 
+  //topまでスクロールする関数
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0, // ページの最上部(0px地点)へ
+      behavior: 'smooth' // スムーズにスクロールする
+    });
+  };
+
   return(
     <div>
       {/*ヘッダー*/}
@@ -69,9 +77,9 @@ export default function App(){
         <header className="sticky-header">
           <Link to="/">My Blog</Link>
           <nav>
-            <Link to="/">ホーム</Link>
             <Link to="/profile">プロフィール</Link>
-            <button onClick={scrollToPostForm} className="hover:underline">投稿へ</button>
+            <button onClick={scrollToPostForm} className="hover:underline">投稿</button>
+            <button onClick={scrollToTop} className="hover:underline">トップ</button>
           </nav>
         </header>
       )}
