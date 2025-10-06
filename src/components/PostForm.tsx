@@ -1,4 +1,5 @@
 import {useState} from 'react';
+import heic2any  from 'heic2any';
 
 export default function PostForm(){
     const[title,setTitle]=useState("");
@@ -6,8 +7,46 @@ export default function PostForm(){
     const[content,setContent]=useState("");
     const[imageFile,setImageFile]=useState<File|null>(null);
     const[password,setPassword]=useState("");
+    const[isConverting,setIsConverting]=useState(false); //画像が変換中の状態
 
     const categories=["温泉","料理","ねこ","技術","日常"]
+
+    const handleImageChange=async(e:React.ChangeEvent<HTMLInputElement>)=>{
+        const file=e.target.files?.[0];
+        if(!file){
+            setImageFile(null);
+            return;
+        }
+
+        //ファイルがHEIC形式かチェック
+        const isHeic=file.type==="image/heic" ||file.type==="image/heif"||file.name.toLowerCase().endsWith(".heic");
+
+        if(isHeic){
+            setIsConverting(true); //変換中状態にセット
+            try{
+                //heic2anyでjpegに変換
+                const convertedBlob=await heic2any({
+                    blob:file,
+                    toType:"image/jpeg",
+                }) as Blob;
+
+                //変換後のblobをfileオブジェクトに戻す
+                const newFileName=file.name.replace(/\.[^/.]+$/,"")+".jpeg";
+                const convertedFile=new File([convertedBlob],newFileName,{type:"image/jpeg"});
+
+                setImageFile(convertedFile);
+            }catch(error){
+                console.error("HEIC conversion error:",error);
+                alert("画像の変換に失敗しました");
+                setImageFile(null);
+            }finally{
+                setIsConverting(false); //変換中状態を解除
+            }
+        }else{
+            //HEIC形式でなければそのままセット
+            setImageFile(file);
+        }
+    };
 
     const handleSubmit=async(e:React.FormEvent)=>{ //投稿ボタンを押したときに実行される関数
         e.preventDefault();
@@ -73,16 +112,11 @@ export default function PostForm(){
                 <input
                     id="image-upload"
                     type="file"
-                    accept="image/*"
-                    onChange={(e) => {
-                        if (e.target.files && e.target.files[0]) {
-                            setImageFile(e.target.files[0]);
-                        } else {
-                            setImageFile(null);
-                        }
-                    }}
+                    accept="image/*,.heic,.heif"
+                    onChange={handleImageChange}
                     className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                 />
+                {isConverting && <p className="text-sm text-gray-500 mt-1">画像を変換中...</p>}
             </div>
             <textarea
                 placeholder='本文'
