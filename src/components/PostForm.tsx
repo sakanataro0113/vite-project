@@ -70,7 +70,7 @@ export default function PostForm() {
             
             <input type="password" placeholder="パスワード" value={password} onChange={(e) => setPassword(e.target.value)} className="border p-2 rounded" required />
             
-            <button type='submit' className='bg-blue-500 text-white py-2 rounded hover:bg-blue-600'>投稿</button>
+            <button type='submit' className='force-bg-gray text-black py-2 rounded'>投稿</button>
         </form>
     );
 }
