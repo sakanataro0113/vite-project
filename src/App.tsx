@@ -57,7 +57,7 @@ export default function App(){
     <div>
       {/*ヘッダー*/}
       <header className="site-header" style={{padding:"1rem",background:"#f0f0f0"}} ref={mainHeaderRef}>
-        <h1>My Blog</h1>
+        <h1>個人ブログ</h1>
         <nav style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem" }}>
           {/* 1行目のリンク */}
           <div style={{ display: "flex", gap: "1rem" }}>
