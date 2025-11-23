@@ -7,6 +7,8 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 // "黒い背景"のスタイルをインポート（vscDarkPlusはVS Code風のダークテーマです）
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
+import remarkBreaks from "remark-breaks";
+
 export default function PostDetailPage() {
   const [post, setPost] = useState<PostData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -69,6 +71,7 @@ export default function PostDetailPage() {
         )}
         <div className="prose lg:prose-xl max-w-none mt-8">
         <ReactMarkdown
+          remarkPlugins={[remarkBreaks]}
           components={{
             code(props) {
               const { children, className, node,ref,...rest } = props;

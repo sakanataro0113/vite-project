@@ -18,7 +18,8 @@
     "react-dom": "^19.1.0",
     "react-markdown": "^10.1.0",
     "react-router-dom": "^7.9.3",
-    "react-syntax-highlighter": "^16.1.0"
+    "react-syntax-highlighter": "^16.1.0",
+    "remark-breaks": "^4.0.0"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250816.0",
