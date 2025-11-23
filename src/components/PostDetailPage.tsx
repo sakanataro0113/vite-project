@@ -2,6 +2,11 @@ import { useState, useEffect } from 'react';
 import { useParams, Link ,useNavigate } from 'react-router-dom';
 import type { PostData } from '../../functions/api/post.ts';
 
+import ReactMarkdown from 'react-markdown';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+// "黒い背景"のスタイルをインポート（vscDarkPlusはVS Code風のダークテーマです）
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+
 export default function PostDetailPage() {
   const [post, setPost] = useState<PostData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -62,11 +67,30 @@ export default function PostDetailPage() {
             />
           </div>
         )}
-        {/* 改行を<br>タグに変換して表示 */}
         <div className="prose lg:prose-xl max-w-none mt-8">
-          {post.content.split('\n').map((paragraph, index) => (
-            <p key={index} className="mb-4">{paragraph}</p>
-          ))}
+        <ReactMarkdown
+          components={{
+            code(props) {
+              const { children, className, node,ref,...rest } = props;
+              const match = /language-(\w+)/.exec(className || '');
+              return match ? (
+                <SyntaxHighlighter
+                  {...rest}
+                  children={String(children).replace(/\n$/, '')}
+                  style={vscDarkPlus}
+                  language={match[1]}
+                  PreTag="div"
+                />
+              ) : (
+                <code {...rest} className={className}>
+                  {children}
+                </code>
+              );
+            }
+          }}
+        >
+          {post.content}
+        </ReactMarkdown>
         </div>
       </article>
     </div>
