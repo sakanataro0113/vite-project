@@ -4,7 +4,9 @@ export default function Profile(){
             <h2>ブログ執筆者紹介</h2>
             <p>年齢：20歳</p>
             <p>職業：学生(情報系大学生)</p>
-            <p>趣味：ゲーム、アニメ、温泉巡り</p>
+            <p>趣味：猫、ゲーム、アニメ、温泉巡り</p>
+            <p>アルバイト：パン屋、qgisシステム開発</p>
+            <p>github: https://github.com/sakanataro0113</p>
         </div>
     )
 }
