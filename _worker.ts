@@ -105,12 +105,20 @@ app.post('/api/post', async (c) => {
     const created_at = new Date().toISOString();
 
     // 5. データベースにデータを挿入
-    const newPost=await c.env.DB.prepare(
+    const result = await c.env.DB.prepare(
       `INSERT INTO posts (title, category, image_url, content, created_at) VALUES (?, ?, ?, ?, ?)`
-    ).bind(title, category, image_url, content, created_at).first();
+    ).bind(title, category, image_url, content, created_at).run();
+
+    // 挿入されたレコードのIDを取得
+    const postId = result.meta.last_row_id;
+
+    // 新しく作成された投稿データを取得
+    const newPost = await c.env.DB.prepare(
+      `SELECT * FROM posts WHERE id = ?`
+    ).bind(postId).first();
 
     // 6. 成功のレスポンスを返す（201 Created）
-    return c.json({ success: true, message: 'Post saved successfully',post:newPost }, 201);
+    return c.json({ success: true, message: 'Post saved successfully', post: newPost }, 201);
 
   } catch (err) {
     console.error(err);
