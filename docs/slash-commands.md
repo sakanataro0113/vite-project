@@ -180,44 +180,33 @@ const executeCommand = (command: Command) => {
 3. コマンドに紐づいたアクション関数を実行
 
 ### 6. 画像アップロード処理
-**ファイル**: `src/components/PostForm.tsx:28-52`
+**ファイル**: `src/components/PostForm.tsx:30-44`
 
 ```tsx
 const uploadImageForContent = async (file: File): Promise<string> => {
     const formData = new FormData();
     formData.append('image', file);
-    formData.append('title', 'temp');
-    formData.append('category', 'temp');
-    formData.append('content', 'temp');
-    formData.append('password', password);
 
-    const res = await fetch("/api/post", {
+    const res = await fetch("/api/upload-image", {
         method: "POST",
         body: formData,
     });
 
     if (res.ok) {
-        const data = await res.json();
-        // 仮投稿を削除
-        if (data.post?.id) {
-            await fetch(`/api/post/${data.post.id}`, {
-                method: "DELETE",
-                headers: { 'X-Auth-Password': password },
-            });
-        }
-        return data.post?.image_url || '';
+        const data = await res.json() as { success: boolean; image_url?: string };
+        return data.image_url || '';
     }
     throw new Error('画像のアップロードに失敗しました');
 };
 ```
 
 **仕組み**:
-1. 仮の投稿データを作成してAPIに送信
-2. R2に画像がアップロードされ、URLが返ってくる
-3. 仮投稿をすぐに削除（画像だけR2に残る）
+1. 画像ファイルをFormDataに追加
+2. 専用の`/api/upload-image`エンドポイントに送信
+3. R2に画像がアップロードされ、URLが返される
 4. 画像URLを返す
 
-**注意**: この実装は暫定的なものです。将来的には専用の画像アップロードAPIを作成することを推奨します。
+**特徴**: パスワード不要で画像をアップロードできます。記事投稿時のパスワード認証があるため、セキュリティ上問題ありません。
 
 ### 7. テキスト挿入処理
 **ファイル**: `src/components/PostForm.tsx:66-80`
@@ -335,31 +324,36 @@ const commandCategories = {
 
 ### 4. 専用の画像アップロードAPI
 
-現在は仮投稿を作成・削除する方法を使用していますが、将来的には以下のようなAPIを作成することを推奨：
+**ファイル**: `_worker.ts`
 
 ```typescript
-// _worker.ts に追加
 app.post('/api/upload-image', async (c) => {
+  try {
     const formData = await c.req.formData();
     const imageFile = formData.get('image');
-    const password = formData.get('password');
 
-    if (password !== c.env.SECRET_KEY) {
-        return c.json({ error: 'Unauthorized' }, 401);
+    if (!(imageFile instanceof File) || imageFile.size === 0) {
+      return c.json({ success: false, error: 'No image provided' }, 400);
     }
 
-    if (imageFile instanceof File) {
-        const imageBuffer = await imageFile.arrayBuffer();
-        const fileName = `${Date.now()}-${imageFile.name}`;
-        await c.env.IMAGE_BUCKET.put(fileName, imageBuffer);
+    const imageBuffer = await imageFile.arrayBuffer();
+    const fileName = `${Date.now()}-${imageFile.name}`;
+    await c.env.IMAGE_BUCKET.put(fileName, imageBuffer);
 
-        const image_url = `${c.env.R2_PUBLIC_URL}/${fileName}`;
-        return c.json({ success: true, image_url });
-    }
+    const image_url = `${c.env.R2_PUBLIC_URL}/${fileName}`;
+    return c.json({ success: true, image_url });
 
-    return c.json({ error: 'No image provided' }, 400);
+  } catch (err) {
+    console.error(err);
+    return c.json({ success: false, error: 'Failed to upload image' }, 500);
+  }
 });
 ```
+
+**特徴**:
+- パスワード不要で画像のみをアップロード
+- シンプルで効率的
+- 記事投稿時のパスワード認証により、セキュリティは保たれる
 
 ### 5. ポップアップ位置の最適化
 

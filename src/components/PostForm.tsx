@@ -31,26 +31,15 @@ export default function PostForm() {
     const uploadImageForContent = async (file: File): Promise<string> => {
         const formData = new FormData();
         formData.append('image', file);
-        formData.append('title', 'temp');
-        formData.append('category', 'temp');
-        formData.append('content', 'temp');
-        formData.append('password', password);
 
-        const res = await fetch("/api/post", {
+        const res = await fetch("/api/upload-image", {
             method: "POST",
             body: formData,
         });
 
         if (res.ok) {
-            const data = await res.json() as { post?: { id?: number; image_url?: string } };
-            // 仮投稿を削除
-            if (data.post?.id) {
-                await fetch(`/api/post/${data.post.id}`, {
-                    method: "DELETE",
-                    headers: { 'X-Auth-Password': password },
-                });
-            }
-            return data.post?.image_url || '';
+            const data = await res.json() as { success: boolean; image_url?: string };
+            return data.image_url || '';
         }
         throw new Error('画像のアップロードに失敗しました');
     };

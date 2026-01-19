@@ -222,7 +222,38 @@ app.delete('/api/post/:id', async (c) => {
   }
 });
 
+/**
+ * POST /api/upload-image
+ * 画像のみをアップロードするエンドポイント（パスワード不要）
+ * /imageコマンドで使用される
+ */
+app.post('/api/upload-image', async (c) => {
+  try {
+    // formDataから画像ファイルを取得
+    const formData = await c.req.formData();
+    const imageFile = formData.get('image');
 
+    // 画像ファイルが存在するか確認
+    if (!(imageFile instanceof File) || imageFile.size === 0) {
+      return c.json({ success: false, error: 'No image provided' }, 400);
+    }
+
+    // R2に画像をアップロード
+    const imageBuffer = await imageFile.arrayBuffer();
+    const fileName = `${Date.now()}-${imageFile.name}`;
+    await c.env.IMAGE_BUCKET.put(fileName, imageBuffer);
+
+    // 画像のURLを生成
+    const image_url = `${c.env.R2_PUBLIC_URL}/${fileName}`;
+
+    // 成功レスポンスを返す
+    return c.json({ success: true, image_url });
+
+  } catch (err) {
+    console.error(err);
+    return c.json({ success: false, error: 'Failed to upload image' }, 500);
+  }
+});
 
 /**
  * API以外のすべてのリクエストを処理します。
