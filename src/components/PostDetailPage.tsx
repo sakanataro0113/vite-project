@@ -89,6 +89,15 @@ export default function PostDetailPage() {
                   {children}
                 </code>
               );
+            },
+            img(props) {
+              return (
+                <img
+                  {...props}
+                  className="article-image"
+                  style={{ display: 'block', marginLeft: 'auto', marginRight: 'auto' }}
+                />
+              );
             }
           }}
         >
