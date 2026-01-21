@@ -276,15 +276,15 @@ graph TB
     end
 
     subgraph "ページ"
-        Home[ホームページ<br/>CategoryPage]
-        Post[記事詳細<br/>PostDetailPage]
-        Form[投稿フォーム<br/>PostForm]
-        Prof[プロフィール<br/>Profile]
+        Home["ホームページ<br/>CategoryPage"]
+        Post["記事詳細<br/>PostDetailPage"]
+        Form["投稿フォーム<br/>PostForm"]
+        Prof["プロフィール<br/>Profile"]
     end
 
     subgraph "共通コンポーネント"
-        Card[記事カード<br/>TitleCard]
-        Header[ヘッダー<br/>(sticky)]
+        Card["記事カード<br/>TitleCard"]
+        Header["ヘッダー - sticky"]
     end
 
     subgraph "外部ライブラリ"
