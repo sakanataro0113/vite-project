@@ -55,7 +55,7 @@ const MapPage: React.FC = () => {
   };
 
   return (
-    <div style={{ textAlign: 'left', width: '100%' }}>
+    <div className="map-page-wrapper">
       <h1 style={{ textAlign: 'center' }}>Map - 訪問地点</h1>
 
       {/* メインコンテンツ: 左側に地図、右側にカード */}

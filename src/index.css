@@ -190,6 +190,16 @@ button:focus-visible {
   opacity: 0.8;
 }
 
+/* MapPage専用のラッパースタイル */
+.map-page-wrapper {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  text-align: left !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
 /* スマホ・タブレット用（768px未満） */
 @media (max-width: 767px) {
   .map-layout {
