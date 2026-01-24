@@ -160,7 +160,8 @@ button:focus-visible {
   gap: 1rem;
   margin-top: 1rem;
   width: 100%;
-  max-width: none;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .map-container {
@@ -168,12 +169,14 @@ button:focus-visible {
   top: 80px;
   height: fit-content;
   max-height: 80vh;
+  min-width: 0; /* グリッドアイテムのオーバーフロー防止 */
 }
 
 .cards-container {
   max-height: 80vh;
   overflow-y: auto;
   padding-right: 0.5rem;
+  min-width: 0; /* グリッドアイテムのオーバーフロー防止 */
 }
 
 /* 地図の都道府県ホバー効果 */
