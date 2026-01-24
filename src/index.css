@@ -152,3 +152,54 @@ button:focus-visible {
     transform: translateY(0);
   }
 }
+
+/* Map機能のレスポンシブレイアウト */
+.map-layout {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.map-container {
+  position: sticky;
+  top: 80px;
+  height: fit-content;
+  max-height: 80vh;
+}
+
+.cards-container {
+  max-height: 80vh;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+/* 地図の都道府県ホバー効果 */
+.geolonia-svg-map .prefecture {
+  transition: fill 0.2s ease;
+  cursor: pointer;
+}
+
+.geolonia-svg-map .prefecture:hover {
+  fill: #93c5fd !important;
+  opacity: 0.8;
+}
+
+/* スマホ・タブレット用（768px未満） */
+@media (max-width: 767px) {
+  .map-layout {
+    grid-template-columns: 1fr; /* 1列に変更 */
+    gap: 1.5rem;
+  }
+
+  .map-container {
+    position: static; /* stickyを解除 */
+    max-height: 400px; /* スマホでは高さを制限 */
+  }
+
+  .cards-container {
+    max-height: none; /* 高さ制限を解除 */
+    overflow-y: visible; /* スクロールを解除 */
+    padding-right: 0;
+  }
+}

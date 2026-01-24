@@ -57,28 +57,14 @@ const MapPage: React.FC = () => {
       <h1>Map - 訪問地点</h1>
 
       {/* メインコンテンツ: 左側に地図、右側にカード */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: '2fr 1fr',
-        gap: '1rem',
-        marginTop: '1rem'
-      }}>
+      <div className="map-layout">
         {/* 左側: 日本地図 */}
-        <div style={{
-          position: 'sticky',
-          top: '80px',
-          height: 'fit-content',
-          maxHeight: '80vh'
-        }}>
+        <div className="map-container">
           <JapanMap locations={locations} onPinClick={handlePinClick} />
         </div>
 
         {/* 右側: カード一覧 */}
-        <div style={{
-          maxHeight: '80vh',
-          overflowY: 'auto',
-          paddingRight: '0.5rem'
-        }}>
+        <div className="cards-container">
           {locations.length === 0 ? (
             <p>まだ地点が登録されていません。</p>
           ) : (
@@ -150,7 +136,6 @@ const MapLocationForm: React.FC<{ onSubmit: (location: MapLocation) => void }> =
   const [prefecture, setPrefecture] = useState('東京');
   const [memo, setMemo] = useState('');
   const [linkedPostId, setLinkedPostId] = useState('');
-  const [password, setPassword] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -160,8 +145,10 @@ const MapLocationForm: React.FC<{ onSubmit: (location: MapLocation) => void }> =
       return;
     }
 
+    // ボタンを押した時にパスワードをプロンプトで入力
+    const password = window.prompt('パスワードを入力してください：');
     if (!password) {
-      alert('パスワードを入力してください。');
+      alert('パスワードが入力されませんでした。');
       return;
     }
 
@@ -180,9 +167,9 @@ const MapLocationForm: React.FC<{ onSubmit: (location: MapLocation) => void }> =
         body: formData,
       });
 
-      const data = await res.json();
+      const data: { success: boolean; location?: MapLocation; error?: string } = await res.json();
 
-      if (data.success) {
+      if (data.success && data.location) {
         alert('地点を追加しました！');
         onSubmit(data.location);
         // フォームをリセット
@@ -190,7 +177,6 @@ const MapLocationForm: React.FC<{ onSubmit: (location: MapLocation) => void }> =
         setPrefecture('東京');
         setMemo('');
         setLinkedPostId('');
-        setPassword('');
       } else {
         alert(`エラー: ${data.error}`);
       }
@@ -262,22 +248,21 @@ const MapLocationForm: React.FC<{ onSubmit: (location: MapLocation) => void }> =
         />
       </div>
 
-      <div>
-        <label htmlFor="password" style={{ display: 'block', marginBottom: '0.25rem' }}>
-          パスワード *
-        </label>
-        <input
-          id="password"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
-        />
-      </div>
-
       <button
         type="submit"
-        className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
+        style={{
+          backgroundColor: '#10b981',
+          color: 'white',
+          padding: '0.75rem 1.5rem',
+          borderRadius: '8px',
+          border: 'none',
+          fontSize: '1rem',
+          fontWeight: '600',
+          cursor: 'pointer',
+          transition: 'background-color 0.2s'
+        }}
+        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#059669'}
+        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#10b981'}
       >
         地点を追加
       </button>

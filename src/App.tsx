@@ -72,6 +72,7 @@ export default function App(){
             {secondRow.map(cat => (
               <Link key={cat} to={`/category/${cat}`}>{cat}</Link>
             ))}
+            <Link to="/map">Map</Link>
             <Link to="/profile">執筆者</Link>
           </div>
         </nav>

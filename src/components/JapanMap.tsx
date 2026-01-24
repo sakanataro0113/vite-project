@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
-// 都道府県の座標（相対位置、0-100の範囲）
+// 都道府県の座標（パーセント位置、0-100の範囲）
 export const prefectureCoordinates: { [key: string]: { x: number; y: number } } = {
   '北海道': { x: 75, y: 10 },
   '青森': { x: 72, y: 22 },
@@ -66,72 +66,89 @@ type JapanMapProps = {
 };
 
 const JapanMap: React.FC<JapanMapProps> = ({ locations, onPinClick }) => {
-  return (
-    <svg
-      viewBox="0 0 100 100"
-      className="w-full h-full"
-      style={{ maxHeight: '800px', border: '1px solid #ccc', borderRadius: '8px' }}
-    >
-      {/* 背景 */}
-      <rect width="100" height="100" fill="#e6f3ff" />
+  const [isMobile, setIsMobile] = useState(false);
+  const [svgContent, setSvgContent] = useState<string>('');
 
-      {/* 日本列島の簡略化された輪郭 */}
-      <path
-        d="M 75 15 Q 78 12 78 18 Q 78 25 75 28 L 72 35 L 70 40 L 68 35 L 65 40 L 62 38 L 60 42 L 58 45 L 55 42 L 52 45 L 50 48 L 48 52 L 45 50 L 42 52 L 38 50 L 35 53 L 32 55 L 28 58 L 25 62 L 22 68 L 20 75 L 18 82 L 20 88 L 25 88 L 28 85 L 30 80 L 32 75 L 35 72 L 38 75 L 40 78 L 43 75 L 45 72 L 48 75 L 50 78 L 52 75 L 55 78 L 58 75 L 60 78 L 63 75 L 65 78 L 68 75 L 70 72 L 72 68 L 75 65 L 78 60 L 80 55 L 78 50 L 75 45 L 73 40 L 75 35 L 78 30 L 77 25 L 75 20 Z"
-        fill="#b8e6b8"
-        stroke="#4a7c59"
-        strokeWidth="0.3"
-        opacity="0.7"
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // SVGファイルを読み込む
+  useEffect(() => {
+    const mapSrc = isMobile ? '/map-mobile.svg' : '/map-full.svg';
+
+    fetch(mapSrc)
+      .then(res => res.text())
+      .then(svg => setSvgContent(svg))
+      .catch(err => console.error('Failed to load map:', err));
+  }, [isMobile]);
+
+  return (
+    <div style={{ position: 'relative', width: '100%', maxHeight: '800px' }}>
+      {/* Geoloniaの日本地図SVG（インライン埋め込み） */}
+      <div
+        dangerouslySetInnerHTML={{ __html: svgContent }}
+        style={{
+          width: '100%',
+          border: '1px solid #ccc',
+          borderRadius: '8px'
+        }}
       />
 
-      {/* ピン表示 */}
+      {/* ピンを絶対配置で重ねる */}
       {locations.map((location) => {
         const coords = prefectureCoordinates[location.prefecture];
         if (!coords) return null;
 
         return (
-          <g
+          <div
             key={location.id}
             onClick={() => onPinClick?.(location)}
-            style={{ cursor: 'pointer' }}
+            style={{
+              position: 'absolute',
+              left: `${coords.x}%`,
+              top: `${coords.y}%`,
+              transform: 'translate(-50%, -100%)',
+              cursor: 'pointer',
+              zIndex: 10
+            }}
           >
-            {/* ピンの影 */}
-            <ellipse
-              cx={coords.x}
-              cy={coords.y + 1.5}
-              rx="0.8"
-              ry="0.3"
-              fill="rgba(0,0,0,0.3)"
-            />
-            {/* ピン本体 */}
-            <circle
-              cx={coords.x}
-              cy={coords.y}
-              r="1.2"
-              fill="#ff4444"
-              stroke="#cc0000"
-              strokeWidth="0.2"
-            />
-            {/* ピンの中心 */}
-            <circle
-              cx={coords.x}
-              cy={coords.y}
-              r="0.5"
-              fill="white"
-              opacity="0.7"
-            />
-            {/* ホバー効果用の透明な大きな円 */}
-            <circle
-              cx={coords.x}
-              cy={coords.y}
-              r="2"
-              fill="transparent"
-              className="hover:fill-[rgba(255,68,68,0.2)]"
-            />
-          </g>
+            {/* ピン */}
+            <svg width="24" height="32" viewBox="0 0 24 32">
+              {/* ピンの影 */}
+              <ellipse
+                cx="12"
+                cy="30"
+                rx="4"
+                ry="2"
+                fill="rgba(0,0,0,0.3)"
+              />
+              {/* ピン本体 */}
+              <path
+                d="M12 0 C7 0 3 4 3 9 C3 14 12 24 12 24 S21 14 21 9 C21 4 17 0 12 0 Z"
+                fill="#ff4444"
+                stroke="#cc0000"
+                strokeWidth="1"
+              />
+              {/* ピンの中心 */}
+              <circle
+                cx="12"
+                cy="9"
+                r="4"
+                fill="white"
+                opacity="0.7"
+              />
+            </svg>
+          </div>
         );
       })}
-    </svg>
+    </div>
   );
 };
 
