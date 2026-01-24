@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import JapanMap, { MapLocation, prefectureCoordinates } from './JapanMap';
+import JapanMap, { prefectureCoordinates } from './JapanMap';
+import type { MapLocation } from './JapanMap';
 
 const MapPage: React.FC = () => {
   const [locations, setLocations] = useState<MapLocation[]>([]);
@@ -11,8 +12,9 @@ const MapPage: React.FC = () => {
     fetch('/api/map-locations')
       .then(res => res.json())
       .then(data => {
-        if (data.success) {
-          setLocations(data.locations);
+        const response = data as { success: boolean; locations?: MapLocation[] };
+        if (response.success && response.locations) {
+          setLocations(response.locations);
         }
       })
       .catch(err => console.error('Failed to fetch map locations:', err));
