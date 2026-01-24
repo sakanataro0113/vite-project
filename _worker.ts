@@ -32,6 +32,16 @@ type PostData = {
   created_at: string;
 };
 
+// 地図の地点データ用の型
+type MapLocation = {
+  id: number;
+  name: string;
+  prefecture: string;
+  memo: string;
+  linked_post_id: number | null;
+  created_at: string;
+};
+
 // --- Honoアプリケーションの作成 ---
 
 // Cloudflare Pagesが提供する機能（nextなど）の型
@@ -252,6 +262,104 @@ app.post('/api/upload-image', async (c) => {
   } catch (err) {
     console.error(err);
     return c.json({ success: false, error: 'Failed to upload image' }, 500);
+  }
+});
+
+/**
+ * GET /api/map-locations
+ * 地図の地点一覧を取得するエンドポイント
+ */
+app.get('/api/map-locations', async (c) => {
+  try {
+    const { results } = await c.env.DB.prepare(
+      `SELECT * FROM map_locations ORDER BY created_at DESC`
+    ).all();
+
+    return c.json({ success: true, locations: results as MapLocation[] });
+  } catch (err) {
+    console.error(err);
+    return c.json({ success: false, error: 'Failed to fetch map locations' }, 500);
+  }
+});
+
+/**
+ * POST /api/map-locations
+ * 新しい地図の地点を追加するエンドポイント
+ */
+app.post('/api/map-locations', async (c) => {
+  try {
+    const formData = await c.req.formData();
+    const password = formData.get('password') as string;
+
+    // パスワードチェック
+    if (password !== c.env.SECRET_KEY) {
+      return c.json({ success: false, error: 'Unauthorized' }, 401);
+    }
+
+    const name = formData.get('name') as string;
+    const prefecture = formData.get('prefecture') as string;
+    const memo = formData.get('memo') as string;
+    const linked_post_id = formData.get('linked_post_id') as string | null;
+
+    // バリデーション
+    if (!name || !prefecture || !memo) {
+      return c.json({ success: false, error: 'Name, prefecture, and memo are required' }, 400);
+    }
+
+    const created_at = new Date().toISOString();
+
+    // データベースに挿入
+    const result = await c.env.DB.prepare(
+      `INSERT INTO map_locations (name, prefecture, memo, linked_post_id, created_at) VALUES (?, ?, ?, ?, ?)`
+    ).bind(name, prefecture, memo, linked_post_id || null, created_at).run();
+
+    const locationId = result.meta.last_row_id;
+
+    // 新しく作成された地点を取得
+    const newLocation = await c.env.DB.prepare(
+      `SELECT * FROM map_locations WHERE id = ?`
+    ).bind(locationId).first();
+
+    return c.json({ success: true, message: 'Location added successfully', location: newLocation }, 201);
+
+  } catch (err) {
+    console.error(err);
+    return c.json({ success: false, error: 'Failed to add location' }, 500);
+  }
+});
+
+/**
+ * DELETE /api/map-locations/:id
+ * 指定されたIDの地点を削除するエンドポイント
+ */
+app.delete('/api/map-locations/:id', async (c) => {
+  try {
+    // ヘッダーからパスワードを取得
+    const password = c.req.header('X-Auth-Password');
+    if (!password || password !== c.env.SECRET_KEY) {
+      return c.json({ success: false, error: 'Unauthorized' }, 401);
+    }
+
+    const locationId = c.req.param('id');
+    if (!locationId) {
+      return c.json({ success: false, error: 'Location ID is required' }, 400);
+    }
+
+    // データベースから削除
+    const result = await c.env.DB.prepare(
+      `DELETE FROM map_locations WHERE id = ?`
+    ).bind(locationId).run();
+
+    if (result.meta.changes > 0) {
+      return c.json({ success: true, message: 'Location deleted successfully' });
+    } else {
+      return c.json({ success: false, error: 'Location not found' }, 404);
+    }
+
+  } catch (err) {
+    console.error(err);
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+    return c.json({ success: false, error: `Failed to delete location: ${errorMessage}` }, 500);
   }
 });
 
