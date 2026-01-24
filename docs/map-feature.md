@@ -574,6 +574,161 @@ npx wrangler d1 execute my_blog_db --remote --command "CREATE TABLE IF NOT EXIST
 - `linked_post_id`が正しい記事IDか確認
 - 対応する記事が存在するか確認
 
+### 地図のホバー効果が機能しない
+
+**問題**:
+- 地図の都道府県にマウスを乗せても色が変わらない
+
+**原因**:
+- `<img>`タグでSVGを読み込むと、CSSがSVGの内部要素（`.prefecture`クラス）にアクセスできない
+
+**解決方法**:
+SVGをインラインで埋め込むように変更
+
+**変更前**:
+```tsx
+<img src={mapSrc} alt="日本地図" />
+```
+
+**変更後**:
+```tsx
+const [svgContent, setSvgContent] = useState<string>('');
+
+useEffect(() => {
+  const mapSrc = isMobile ? '/map-mobile.svg' : '/map-full.svg';
+  fetch(mapSrc)
+    .then(res => res.text())
+    .then(svg => setSvgContent(svg))
+    .catch(err => console.error('Failed to load map:', err));
+}, [isMobile]);
+
+return (
+  <div dangerouslySetInnerHTML={{ __html: svgContent }} />
+);
+```
+
+これでCSSの`.prefecture:hover`が正しく動作します。
+
+---
+
+## 12. 実装中に発生したエラーと解決方法
+
+### エラー1: TypeScript型インポートエラー
+
+**エラーメッセージ**:
+```
+src/components/MapPage.tsx(3,20): error TS1484: 'MapLocation' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+```
+
+**原因**:
+- `verbatimModuleSyntax`が有効な場合、型のインポートは`import type`で行う必要がある
+
+**解決方法**:
+
+**修正前**:
+```tsx
+import JapanMap, { MapLocation, prefectureCoordinates } from './JapanMap';
+```
+
+**修正後**:
+```tsx
+import JapanMap, { prefectureCoordinates } from './JapanMap';
+import type { MapLocation } from './JapanMap';
+```
+
+---
+
+### エラー2: fetch()のレスポンス型エラー
+
+**エラーメッセージ**:
+```
+error TS18046: 'data' is of type 'unknown'.
+```
+
+**原因**:
+- `res.json()`の戻り値は`unknown`型
+- TypeScriptは型を推論できないため、明示的な型アサーションが必要
+
+**解決方法**:
+
+**修正前**:
+```tsx
+.then(data => {
+  if (data.success) {
+    setLocations(data.locations);
+  }
+})
+```
+
+**修正後**:
+```tsx
+.then(data => {
+  const response = data as { success: boolean; locations?: MapLocation[] };
+  if (response.success && response.locations) {
+    setLocations(response.locations);
+  }
+})
+```
+
+**ポイント**:
+- `as`キーワードで型アサーション
+- オプショナルプロパティ（`?`）で安全性を確保
+- 条件分岐で`undefined`チェック
+
+---
+
+### エラー3: ビルド時の型互換性エラー
+
+**エラーメッセージ**:
+```
+error TS2345: Argument of type '(data: { success: boolean; locations?: MapLocation[]; }) => void' is not assignable to parameter of type '(value: unknown) => void | PromiseLike<void>'.
+```
+
+**原因**:
+- `.then()`のコールバック関数のパラメータ型を直接指定すると、TypeScriptの型推論と競合
+
+**解決方法**:
+
+**修正前**:
+```tsx
+.then((data: { success: boolean; locations?: MapLocation[] }) => {
+  if (data.success && data.locations) {
+    setLocations(data.locations);
+  }
+})
+```
+
+**修正後**:
+```tsx
+.then(data => {
+  const response = data as { success: boolean; locations?: MapLocation[] };
+  if (response.success && response.locations) {
+    setLocations(response.locations);
+  }
+})
+```
+
+**ポイント**:
+- パラメータの型注釈を削除
+- 関数内で型アサーション（`as`）を使用
+
+---
+
+## 13. 今後の開発で注意すること
+
+### TypeScriptの型安全性
+- APIレスポンスは必ず型を明示する
+- `unknown`型は適切に型アサーションする
+- 型インポートは`import type`を使用
+
+### SVGの扱い
+- CSSでスタイル変更したい場合はインライン埋め込み
+- `<img>`タグは単純な表示のみ
+
+### ビルドエラーの確認
+- デプロイ前に必ず`npm run build`でローカルビルド確認
+- 開発サーバー（`npm run dev`）では見つからないエラーがある
+
 ---
 
 **最終更新**: 2026-01-25
