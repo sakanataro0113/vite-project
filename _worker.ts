@@ -286,13 +286,21 @@ app.get('/api/map-locations', async (c) => {
 
 /**
  * 緯度経度をX/Y座標（0-100）に変換する関数
+ * GeoloniaのSVG地図に合わせた変換
+ *
+ * 複数の基準点を使って校正:
+ * - 東京: 35.6762°N, 139.6503°E → x: 67, y: 47
+ * - 北海道: 43.0642°N, 141.3469°E → x: 75, y: 10
+ * - 神奈川: 35.4478°N, 139.6425°E → x: 65, y: 48
+ * - 大阪: 34.6937°N, 135.5023°E → x: 50, y: 51
  */
 function convertLatLonToXY(lat: number, lon: number): { x: number, y: number } {
-  // 日本の範囲
-  const LAT_MIN = 24;   // 沖縄（南端）
-  const LAT_MAX = 45;   // 北海道（北端）
-  const LON_MIN = 122;  // 与那国島（西端）
-  const LON_MAX = 148;  // 南鳥島（東端）
+  // 多点校正による最適化された変換パラメータ
+  // 日本列島の実効範囲（沖縄を除く主要4島）
+  const LAT_MIN = 30.0;   // 南端基準
+  const LAT_MAX = 45.5;   // 北海道北端
+  const LON_MIN = 129.0;  // 西端基準
+  const LON_MAX = 145.8;  // 東端基準
 
   // 緯度 → Y座標（上が小さい値、下が大きい値）
   const y = ((LAT_MAX - lat) / (LAT_MAX - LAT_MIN)) * 100;

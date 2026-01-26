@@ -94,6 +94,12 @@ const MapPage: React.FC = () => {
                     ({location.prefecture})
                   </span>
                 </h3>
+                {/* デバッグ用：座標表示 */}
+                {(location.x_coordinate !== null && location.y_coordinate !== null) && (
+                  <p style={{ fontSize: '0.8rem', color: '#999' }}>
+                    座標: X={location.x_coordinate?.toFixed(2)}, Y={location.y_coordinate?.toFixed(2)}
+                  </p>
+                )}
                 <p style={{ margin: '0.5rem 0', color: '#555' }}>{location.memo}</p>
 
                 {/* リンクされた投稿があれば表示 */}

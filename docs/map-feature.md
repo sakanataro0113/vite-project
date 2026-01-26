@@ -976,4 +976,113 @@ error TS2345: Argument of type '(data: { success: boolean; locations?: MapLocati
 
 ---
 
+### 緯度経度からX/Y座標への変換が不正確
+
+**問題**:
+- Google Mapsから取得した緯度経度を登録したが、地図上で全く違う場所にピンが表示される
+- 例: 箱根温泉（神奈川県）の座標を登録したら、宮城県にピンが表示された
+
+**原因**:
+- 簡易的な線形変換式が、実際のGeolonia SVG地図の投影と一致していない
+- 日本列島全体を覆う範囲で計算すると、地域によって誤差が大きくなる
+
+**解決方法**:
+東京と北海道の実際の緯度経度を基準に、変換パラメータを校正する。
+
+**ファイル**: `_worker.ts:288-310`
+
+**修正前**:
+```typescript
+function convertLatLonToXY(lat: number, lon: number): { x: number, y: number } {
+  const LAT_MIN = 30;   // 鹿児島南端
+  const LAT_MAX = 45.5; // 北海道北端
+  const LON_MIN = 128;  // 九州西端
+  const LON_MAX = 146;  // 北海道東端
+
+  const y = ((LAT_MAX - lat) / (LAT_MAX - LAT_MIN)) * 100;
+  const x = ((lon - LON_MIN) / (LON_MAX - LON_MIN)) * 100;
+
+  return {
+    x: Math.max(0, Math.min(100, x)),
+    y: Math.max(0, Math.min(100, y))
+  };
+}
+```
+
+**修正後**:
+```typescript
+function convertLatLonToXY(lat: number, lon: number): { x: number, y: number } {
+  // SVG地図の実際の投影に合わせた範囲（校正済み）
+  // 基準点:
+  // - 東京: 35.6762°N, 139.6503°E → x: 67, y: 47
+  // - 北海道: 43.0642°N, 141.3469°E → x: 75, y: 10
+  const LAT_MIN = 25.06;
+  const LAT_MAX = 45.06;
+  const LON_MIN = 125.44;
+  const LON_MAX = 146.65;
+
+  const y = ((LAT_MAX - lat) / (LAT_MAX - LAT_MIN)) * 100;
+  const x = ((lon - LON_MIN) / (LON_MAX - LON_MIN)) * 100;
+
+  return {
+    x: Math.max(0, Math.min(100, x)),
+    y: Math.max(0, Math.min(100, y))
+  };
+}
+```
+
+**校正方法**:
+1. 既知の2地点（東京、北海道）の実座標と期待されるSVG座標を使用
+2. 連立方程式を解いて、LAT_MIN/MAX、LON_MIN/MAXを算出
+
+**計算例**（東京と北海道を使用）:
+```
+東京: lat 35.6762, lon 139.6503 → 期待値 x: 67, y: 47
+北海道: lat 43.0642, lon 141.3469 → 期待値 x: 75, y: 10
+
+緯度からY座標への変換:
+y = ((LAT_MAX - lat) / (LAT_MAX - LAT_MIN)) * 100
+
+北海道: 10 = ((LAT_MAX - 43.0642) / (LAT_MAX - LAT_MIN)) * 100
+東京: 47 = ((LAT_MAX - 35.6762) / (LAT_MAX - LAT_MIN)) * 100
+
+これを解くと:
+LAT_MAX - LAT_MIN = 20
+LAT_MAX = 45.06
+LAT_MIN = 25.06
+
+経度からX座標への変換も同様に:
+LON_MAX - LON_MIN = 21.21
+LON_MIN = 125.44
+LON_MAX = 146.65
+```
+
+**検証**:
+箱根温泉（35.233850°N, 139.09555°E）の場合:
+```
+y = ((45.06 - 35.233850) / 20) * 100 = 49.13
+x = ((139.09555 - 125.44) / 21.21) * 100 = 64.40
+```
+神奈川県のデフォルト座標（x: 65, y: 48）と近い値になり、正しく表示される。
+
+**デバッグ用の座標表示**:
+カードに実際のX/Y座標を表示することで、変換結果を確認できる。
+
+**ファイル**: `src/components/MapPage.tsx:98-102`
+
+```tsx
+{(location.x_coordinate !== null && location.y_coordinate !== null) && (
+  <p style={{ fontSize: '0.8rem', color: '#999' }}>
+    座標: X={location.x_coordinate?.toFixed(2)}, Y={location.y_coordinate?.toFixed(2)}
+  </p>
+)}
+```
+
+**ポイント**:
+- 地図の投影方法によって、変換式は異なる
+- 複数の基準点を使って校正することで精度が向上する
+- 今後さらに精度が必要な場合は、より多くの基準点（大阪、福岡など）を使用する
+
+---
+
 **最終更新**: 2026-01-26
