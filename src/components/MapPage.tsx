@@ -138,6 +138,9 @@ const MapLocationForm: React.FC<{ onSubmit: (location: MapLocation) => void }> =
   const [prefecture, setPrefecture] = useState('東京');
   const [memo, setMemo] = useState('');
   const [linkedPostId, setLinkedPostId] = useState('');
+  const [xCoordinate, setXCoordinate] = useState('');
+  const [yCoordinate, setYCoordinate] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -162,6 +165,12 @@ const MapLocationForm: React.FC<{ onSubmit: (location: MapLocation) => void }> =
     if (linkedPostId) {
       formData.append('linked_post_id', linkedPostId);
     }
+    if (xCoordinate) {
+      formData.append('x_coordinate', xCoordinate);
+    }
+    if (yCoordinate) {
+      formData.append('y_coordinate', yCoordinate);
+    }
 
     try {
       const res = await fetch('/api/map-locations', {
@@ -179,6 +188,9 @@ const MapLocationForm: React.FC<{ onSubmit: (location: MapLocation) => void }> =
         setPrefecture('東京');
         setMemo('');
         setLinkedPostId('');
+        setXCoordinate('');
+        setYCoordinate('');
+        setSearchQuery('');
       } else {
         alert(`エラー: ${data.error}`);
       }
@@ -189,6 +201,17 @@ const MapLocationForm: React.FC<{ onSubmit: (location: MapLocation) => void }> =
   };
 
   const prefectures = Object.keys(prefectureCoordinates);
+
+  // Google Maps検索を開く
+  const handleGoogleMapsSearch = () => {
+    const query = searchQuery || `${name} ${prefecture}`;
+    if (!query.trim()) {
+      alert('検索ワードを入力してください');
+      return;
+    }
+    const url = `https://www.google.com/maps/search/${encodeURIComponent(query)}`;
+    window.open(url, '_blank');
+  };
 
   return (
     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -220,6 +243,84 @@ const MapLocationForm: React.FC<{ onSubmit: (location: MapLocation) => void }> =
             <option key={pref} value={pref}>{pref}</option>
           ))}
         </select>
+      </div>
+
+      {/* Google Maps検索セクション */}
+      <div style={{ padding: '1rem', background: '#f0f9ff', borderRadius: '8px', border: '1px solid #bfdbfe' }}>
+        <h3 style={{ margin: '0 0 0.75rem 0', fontSize: '1rem', color: '#1e40af' }}>
+          📍 Google Mapsで座標を確認
+        </h3>
+        <div style={{ marginBottom: '0.75rem' }}>
+          <label htmlFor="searchQuery" style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.9rem' }}>
+            検索ワード（省略可 - 場所名＋都道府県で自動検索）
+          </label>
+          <input
+            id="searchQuery"
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={`例: ${name || '有馬温泉'} ${prefecture}`}
+            style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #93c5fd' }}
+          />
+        </div>
+        <button
+          type="button"
+          onClick={handleGoogleMapsSearch}
+          style={{
+            backgroundColor: '#3b82f6',
+            color: 'white',
+            padding: '0.5rem 1rem',
+            borderRadius: '6px',
+            border: 'none',
+            cursor: 'pointer',
+            fontSize: '0.95rem',
+            fontWeight: '500',
+            width: '100%'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2563eb'}
+          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3b82f6'}
+        >
+          🔍 Google Mapsで検索
+        </button>
+        <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '0.5rem 0 0 0' }}>
+          ヒント: Google Mapsで場所を右クリック → 座標をコピー → 下に貼り付け
+        </p>
+      </div>
+
+      {/* 座標入力欄 */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+        <div>
+          <label htmlFor="xCoordinate" style={{ display: 'block', marginBottom: '0.25rem' }}>
+            X座標（横位置 0-100）
+          </label>
+          <input
+            id="xCoordinate"
+            type="number"
+            step="0.1"
+            min="0"
+            max="100"
+            value={xCoordinate}
+            onChange={(e) => setXCoordinate(e.target.value)}
+            placeholder={`初期値: ${prefectureCoordinates[prefecture]?.x || ''}`}
+            style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
+          />
+        </div>
+        <div>
+          <label htmlFor="yCoordinate" style={{ display: 'block', marginBottom: '0.25rem' }}>
+            Y座標（縦位置 0-100）
+          </label>
+          <input
+            id="yCoordinate"
+            type="number"
+            step="0.1"
+            min="0"
+            max="100"
+            value={yCoordinate}
+            onChange={(e) => setYCoordinate(e.target.value)}
+            placeholder={`初期値: ${prefectureCoordinates[prefecture]?.y || ''}`}
+            style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
+          />
+        </div>
       </div>
 
       <div>

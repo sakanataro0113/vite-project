@@ -172,6 +172,7 @@ button:focus-visible {
   height: fit-content;
   max-height: 80vh;
   min-width: 0; /* グリッドアイテムのオーバーフロー防止 */
+  z-index: 1; /* フォームより下に配置 */
 }
 
 .cards-container {

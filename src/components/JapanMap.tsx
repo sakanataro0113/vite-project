@@ -57,6 +57,8 @@ export type MapLocation = {
   prefecture: string;
   memo: string;
   linked_post_id?: number;
+  x_coordinate?: number | null;
+  y_coordinate?: number | null;
   created_at: string;
 };
 
@@ -103,8 +105,18 @@ const JapanMap: React.FC<JapanMapProps> = ({ locations, onPinClick }) => {
 
       {/* ピンを絶対配置で重ねる */}
       {locations.map((location) => {
-        const coords = prefectureCoordinates[location.prefecture];
-        if (!coords) return null;
+        // カスタム座標があればそれを使用、なければ都道府県座標
+        let x, y;
+        if (location.x_coordinate !== null && location.x_coordinate !== undefined &&
+            location.y_coordinate !== null && location.y_coordinate !== undefined) {
+          x = location.x_coordinate;
+          y = location.y_coordinate;
+        } else {
+          const coords = prefectureCoordinates[location.prefecture];
+          if (!coords) return null;
+          x = coords.x;
+          y = coords.y;
+        }
 
         return (
           <div
@@ -112,8 +124,8 @@ const JapanMap: React.FC<JapanMapProps> = ({ locations, onPinClick }) => {
             onClick={() => onPinClick?.(location)}
             style={{
               position: 'absolute',
-              left: `${coords.x}%`,
-              top: `${coords.y}%`,
+              left: `${x}%`,
+              top: `${y}%`,
               transform: 'translate(-50%, -100%)',
               cursor: 'pointer',
               zIndex: 10
