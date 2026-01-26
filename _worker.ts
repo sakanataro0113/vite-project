@@ -285,6 +285,29 @@ app.get('/api/map-locations', async (c) => {
 });
 
 /**
+ * 緯度経度をX/Y座標（0-100）に変換する関数
+ */
+function convertLatLonToXY(lat: number, lon: number): { x: number, y: number } {
+  // 日本の範囲
+  const LAT_MIN = 24;   // 沖縄（南端）
+  const LAT_MAX = 45;   // 北海道（北端）
+  const LON_MIN = 122;  // 与那国島（西端）
+  const LON_MAX = 148;  // 南鳥島（東端）
+
+  // 緯度 → Y座標（上が小さい値、下が大きい値）
+  const y = ((LAT_MAX - lat) / (LAT_MAX - LAT_MIN)) * 100;
+
+  // 経度 → X座標（左が小さい値、右が大きい値）
+  const x = ((lon - LON_MIN) / (LON_MAX - LON_MIN)) * 100;
+
+  // 0-100の範囲に制限
+  return {
+    x: Math.max(0, Math.min(100, x)),
+    y: Math.max(0, Math.min(100, y))
+  };
+}
+
+/**
  * POST /api/map-locations
  * 新しい地図の地点を追加するエンドポイント
  */
@@ -302,8 +325,8 @@ app.post('/api/map-locations', async (c) => {
     const prefecture = formData.get('prefecture') as string;
     const memo = formData.get('memo') as string;
     const linked_post_id = formData.get('linked_post_id') as string | null;
-    const x_coordinate = formData.get('x_coordinate') as string | null;
-    const y_coordinate = formData.get('y_coordinate') as string | null;
+    const latitude = formData.get('latitude') as string | null;
+    const longitude = formData.get('longitude') as string | null;
 
     // バリデーション
     if (!name || !prefecture || !memo) {
@@ -312,9 +335,21 @@ app.post('/api/map-locations', async (c) => {
 
     const created_at = new Date().toISOString();
 
-    // 座標を数値に変換（存在する場合）
-    const xCoord = x_coordinate ? parseFloat(x_coordinate) : null;
-    const yCoord = y_coordinate ? parseFloat(y_coordinate) : null;
+    // 緯度経度が提供されている場合、X/Y座標に変換
+    let xCoord: number | null = null;
+    let yCoord: number | null = null;
+
+    if (latitude && longitude) {
+      const lat = parseFloat(latitude);
+      const lon = parseFloat(longitude);
+
+      // 有効な緯度経度かチェック
+      if (!isNaN(lat) && !isNaN(lon)) {
+        const converted = convertLatLonToXY(lat, lon);
+        xCoord = converted.x;
+        yCoord = converted.y;
+      }
+    }
 
     // データベースに挿入
     const result = await c.env.DB.prepare(

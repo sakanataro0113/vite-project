@@ -149,8 +149,8 @@ const MapLocationForm: React.FC<{ onSubmit: (location: MapLocation) => void }> =
   const [prefecture, setPrefecture] = useState('東京');
   const [memo, setMemo] = useState('');
   const [linkedPostId, setLinkedPostId] = useState('');
-  const [xCoordinate, setXCoordinate] = useState('');
-  const [yCoordinate, setYCoordinate] = useState('');
+  const [latitude, setLatitude] = useState('');
+  const [longitude, setLongitude] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -176,11 +176,11 @@ const MapLocationForm: React.FC<{ onSubmit: (location: MapLocation) => void }> =
     if (linkedPostId) {
       formData.append('linked_post_id', linkedPostId);
     }
-    if (xCoordinate) {
-      formData.append('x_coordinate', xCoordinate);
+    if (latitude) {
+      formData.append('latitude', latitude);
     }
-    if (yCoordinate) {
-      formData.append('y_coordinate', yCoordinate);
+    if (longitude) {
+      formData.append('longitude', longitude);
     }
 
     try {
@@ -199,8 +199,8 @@ const MapLocationForm: React.FC<{ onSubmit: (location: MapLocation) => void }> =
         setPrefecture('東京');
         setMemo('');
         setLinkedPostId('');
-        setXCoordinate('');
-        setYCoordinate('');
+        setLatitude('');
+        setLongitude('');
         setSearchQuery('');
       } else {
         alert(`エラー: ${data.error}`);
@@ -298,41 +298,40 @@ const MapLocationForm: React.FC<{ onSubmit: (location: MapLocation) => void }> =
         </p>
       </div>
 
-      {/* 座標入力欄 */}
+      {/* 緯度経度入力欄 */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
         <div>
-          <label htmlFor="xCoordinate" style={{ display: 'block', marginBottom: '0.25rem' }}>
-            X座標（横位置 0-100）
+          <label htmlFor="latitude" style={{ display: 'block', marginBottom: '0.25rem' }}>
+            緯度（任意）
           </label>
           <input
-            id="xCoordinate"
+            id="latitude"
             type="number"
-            step="0.1"
-            min="0"
-            max="100"
-            value={xCoordinate}
-            onChange={(e) => setXCoordinate(e.target.value)}
-            placeholder={`初期値: ${prefectureCoordinates[prefecture]?.x || ''}`}
+            step="0.000001"
+            value={latitude}
+            onChange={(e) => setLatitude(e.target.value)}
+            placeholder="例: 35.233850"
             style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
           />
         </div>
         <div>
-          <label htmlFor="yCoordinate" style={{ display: 'block', marginBottom: '0.25rem' }}>
-            Y座標（縦位置 0-100）
+          <label htmlFor="longitude" style={{ display: 'block', marginBottom: '0.25rem' }}>
+            経度（任意）
           </label>
           <input
-            id="yCoordinate"
+            id="longitude"
             type="number"
-            step="0.1"
-            min="0"
-            max="100"
-            value={yCoordinate}
-            onChange={(e) => setYCoordinate(e.target.value)}
-            placeholder={`初期値: ${prefectureCoordinates[prefecture]?.y || ''}`}
+            step="0.000001"
+            value={longitude}
+            onChange={(e) => setLongitude(e.target.value)}
+            placeholder="例: 139.095552"
             style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
           />
         </div>
       </div>
+      <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '0.5rem 0' }}>
+        ※ 緯度経度を入力しない場合は、都道府県のデフォルト位置にピンが表示されます
+      </p>
 
       <div>
         <label htmlFor="memo" style={{ display: 'block', marginBottom: '0.25rem' }}>
