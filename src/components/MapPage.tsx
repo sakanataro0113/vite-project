@@ -133,7 +133,7 @@ const MapPage: React.FC = () => {
         background: '#f9f9f9',
         borderRadius: '8px',
         position: 'relative',
-        zIndex: 100,
+        zIndex: 10,
         clear: 'both'
       }}>
         <h2>新しい地点を追加</h2>
