@@ -124,7 +124,15 @@ const MapPage: React.FC = () => {
       </div>
 
       {/* 地点追加フォーム */}
-      <div style={{ marginTop: '2rem', padding: '1rem', background: '#f9f9f9', borderRadius: '8px' }}>
+      <div style={{
+        marginTop: '2rem',
+        padding: '1rem',
+        background: '#f9f9f9',
+        borderRadius: '8px',
+        position: 'relative',
+        zIndex: 100,
+        clear: 'both'
+      }}>
         <h2>新しい地点を追加</h2>
         <MapLocationForm onSubmit={(newLocation) => setLocations([...locations, newLocation])} />
       </div>
