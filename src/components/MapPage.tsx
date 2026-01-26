@@ -58,15 +58,17 @@ const MapPage: React.FC = () => {
     <div className="map-page-wrapper">
       <h1 style={{ textAlign: 'center' }}>Map - 訪問地点</h1>
 
-      {/* メインコンテンツ: 左側に地図、右側にカード */}
-      <div className="map-layout">
-        {/* 左側: 日本地図 */}
-        <div className="map-container">
-          <JapanMap locations={locations} onPinClick={handlePinClick} />
-        </div>
+      {/* グリッドコンテナのラッパー */}
+      <div style={{ position: 'relative', marginBottom: '3rem' }}>
+        {/* メインコンテンツ: 左側に地図、右側にカード */}
+        <div className="map-layout" style={{ paddingBottom: '2rem' }}>
+          {/* 左側: 日本地図 */}
+          <div className="map-container">
+            <JapanMap locations={locations} onPinClick={handlePinClick} />
+          </div>
 
-        {/* 右側: カード一覧 */}
-        <div className="cards-container">
+          {/* 右側: カード一覧 */}
+          <div className="cards-container">
           {locations.length === 0 ? (
             <p>まだ地点が登録されていません。</p>
           ) : (
@@ -121,6 +123,7 @@ const MapPage: React.FC = () => {
             ))
           )}
         </div>
+      </div>
       </div>
 
       {/* 地点追加フォーム */}

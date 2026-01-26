@@ -403,7 +403,13 @@ app.delete('/api/map-locations/:id', async (c) => {
 | prefecture | TEXT | 都道府県名（必須） |
 | memo | TEXT | メモ・詳細説明（必須） |
 | linked_post_id | INTEGER | 関連する記事のID（NULL可） |
+| x_coordinate | REAL | X座標 0-100（NULL可） |
+| y_coordinate | REAL | Y座標 0-100（NULL可） |
 | created_at | TEXT | 作成日時（ISO 8601形式） |
+
+**座標の優先順位**:
+- カスタム座標（`x_coordinate`, `y_coordinate`）が設定されている場合 → それを使用
+- カスタム座標がNULLの場合 → 都道府県のデフォルト座標を使用
 
 ### テーブル作成SQL
 ```sql
@@ -413,8 +419,16 @@ CREATE TABLE IF NOT EXISTS map_locations (
   prefecture TEXT NOT NULL,
   memo TEXT NOT NULL,
   linked_post_id INTEGER,
+  x_coordinate REAL,
+  y_coordinate REAL,
   created_at TEXT NOT NULL
 );
+```
+
+### 座標カラム追加SQL（既存テーブルに追加する場合）
+```sql
+ALTER TABLE map_locations ADD COLUMN x_coordinate REAL;
+ALTER TABLE map_locations ADD COLUMN y_coordinate REAL;
 ```
 
 **実行方法（ローカル）**:
@@ -492,31 +506,152 @@ npx wrangler d1 execute my_blog_db --remote --command "CREATE TABLE IF NOT EXIST
 
 ---
 
-## 9. 使用例
+## 9. カスタム座標機能
 
-### 9.1 地点を追加
+### 9.1 概要
+
+各地点のピン位置を正確に指定できる機能です。
+
+**特徴**:
+- Google Maps検索ボタンで正確な位置を確認
+- X座標（横）とY座標（縦）を0-100の範囲で指定
+- 都道府県のデフォルト座標を初期値として表示
+- カスタム座標がない場合は自動的にデフォルト座標を使用
+
+### 9.2 Google Maps検索機能
+
+**ファイル**: `src/components/MapPage.tsx:206-213`
+
+```tsx
+const handleGoogleMapsSearch = () => {
+  const query = searchQuery || `${name} ${prefecture}`;
+  if (!query.trim()) {
+    alert('検索ワードを入力してください');
+    return;
+  }
+  const url = `https://www.google.com/maps/search/${encodeURIComponent(query)}`;
+  window.open(url, '_blank');
+};
+```
+
+**動作フロー**:
+1. 「場所の名前」と「都道府県」を入力
+2. 「Google Mapsで検索」ボタンをクリック
+3. 新しいタブでGoogle Maps検索結果が開く
+4. Google Mapsで場所を右クリック → 座標をコピー
+5. 緯度経度を0-100の範囲に変換してX/Y欄に入力
+
+### 9.3 座標の変換方法
+
+Google Mapsの座標（緯度・経度）を地図の座標（0-100）に変換：
+
+**簡易変換方法**:
+- 日本地図の範囲: 北海道の北端から沖縄の南端まで
+- 手動で微調整しながら確認
+
+**詳細な変換式**（参考）:
+```
+X座標 = ((経度 - 122) / (148 - 122)) * 100
+Y座標 = ((50 - 緯度) / (50 - 24)) * 100
+```
+
+### 9.4 フォームUI
+
+**ファイル**: `src/components/MapPage.tsx:250-309`
+
+```tsx
+{/* Google Maps検索セクション */}
+<div style={{ padding: '1rem', background: '#f0f9ff', ... }}>
+  <h3>📍 Google Mapsで座標を確認</h3>
+  <input
+    placeholder={`例: ${name || '有馬温泉'} ${prefecture}`}
+    ...
+  />
+  <button onClick={handleGoogleMapsSearch}>
+    🔍 Google Mapsで検索
+  </button>
+  <p>ヒント: Google Mapsで場所を右クリック → 座標をコピー → 下に貼り付け</p>
+</div>
+
+{/* 座標入力欄 */}
+<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+  <input placeholder={`初期値: ${prefectureCoordinates[prefecture]?.x}`} />
+  <input placeholder={`初期値: ${prefectureCoordinates[prefecture]?.y}`} />
+</div>
+```
+
+### 9.5 座標の使用ロジック
+
+**ファイル**: `src/components/JapanMap.tsx:107-120`
+
+```tsx
+{locations.map((location) => {
+  // カスタム座標があればそれを使用、なければ都道府県座標
+  let x, y;
+  if (location.x_coordinate !== null && location.x_coordinate !== undefined &&
+      location.y_coordinate !== null && location.y_coordinate !== undefined) {
+    x = location.x_coordinate;
+    y = location.y_coordinate;
+  } else {
+    const coords = prefectureCoordinates[location.prefecture];
+    if (!coords) return null;
+    x = coords.x;
+    y = coords.y;
+  }
+
+  return (
+    <div style={{ left: `${x}%`, top: `${y}%`, ... }}>
+      {/* ピン */}
+    </div>
+  );
+})}
+```
+
+**ポイント**:
+- `null`と`undefined`の両方をチェック
+- カスタム座標が設定されていない既存データも正常に動作
+- 後方互換性を維持
+
+---
+
+## 10. 使用例
+
+### 10.1 基本的な地点の追加
 1. Mapページを開く
 2. 下部のフォームに入力
    - 場所の名前: "有馬温泉"
    - 都道府県: "兵庫"
    - メモ: "日本三名泉の一つ。金泉が有名。"
    - 関連する投稿ID: 12（オプション）
-   - パスワード: 設定したパスワード
 3. 「地点を追加」ボタンをクリック
-4. 地図上にピンが表示され、右側にカードが追加される
+4. パスワードを入力
+5. 地図上にピンが表示され、右側にカードが追加される
 
-### 9.2 地点を確認
+**結果**: 兵庫県のデフォルト座標にピンが配置される
+
+### 10.2 正確な座標で地点を追加（推奨）
+1. 「場所の名前」と「都道府県」を入力
+2. 「🔍 Google Mapsで検索」ボタンをクリック
+3. Google Mapsで正確な場所を確認
+4. 地図上で右クリック → 座標をコピー
+5. X座標とY座標の欄に値を入力（例: X=48, Y=50）
+6. メモなどを入力
+7. 「地点を追加」ボタンをクリック
+
+**結果**: 指定した正確な座標にピンが配置される
+
+### 10.3 地点を確認
 1. 地図上のピンをクリック
 2. 対応するカードが黄色背景で表示される
 3. カードが見える位置まで自動スクロール
 
-### 9.3 関連記事へ移動
+### 10.4 関連記事へ移動
 1. カードの「関連記事を見る →」リンクをクリック
 2. 対応する記事の詳細ページへ遷移
 
 ---
 
-## 10. 今後の改善案
+## 11. 今後の改善案
 
 ### 1. 地図の強化
 - より詳細な都道府県の輪郭
@@ -554,7 +689,7 @@ npx wrangler d1 execute my_blog_db --remote --command "CREATE TABLE IF NOT EXIST
 
 ---
 
-## 11. トラブルシューティング
+## 12. トラブルシューティング
 
 ### 地点が地図に表示されない
 - 都道府県名が正しいか確認（例: "東京都" ではなく "東京"）
@@ -609,9 +744,109 @@ return (
 
 これでCSSの`.prefecture:hover`が正しく動作します。
 
+### ページ全体の幅が狭くなる（横スクロールバーが出る）
+
+**問題**:
+- Mapページやカテゴリページで横スクロールバーが表示される
+- ヘッダーやコンテンツの幅が画面幅より大きくなる
+
+**原因**:
+- `#root`に`padding: 2rem`が設定されている
+- `width: 100%` + `padding`で、合計が100%を超える
+- `box-sizing: content-box`（デフォルト）のため
+
+**解決方法**:
+
+**ファイル**: `src/index.css:16-22`
+
+**修正前**:
+```css
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+```
+
+**修正後**:
+```css
+#root {
+  max-width: 1280px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+  box-sizing: border-box; /* パディングを幅に含める */
+}
+```
+
+**ポイント**:
+- `box-sizing: border-box`で、`width`にパディングとボーダーが含まれる
+- これにより`width: 100%` = 画面幅全体（パディング込み）
+
 ---
 
-## 12. 実装中に発生したエラーと解決方法
+### 地図と地点追加フォームが重なる
+
+**問題**:
+- sticky地図がスクロール時にフォームの上に被さる
+- フォームが見えなくなる
+
+**原因**:
+- `.map-container`に`position: sticky`が設定されている
+- `.map-container`の`z-index: 1`が、フォームより上
+- フォームに`z-index`が設定されていない
+
+**解決方法**:
+
+**ファイル**: `src/components/MapPage.tsx:127-135`
+
+**修正前**:
+```tsx
+<div style={{ marginTop: '2rem', padding: '1rem', background: '#f9f9f9', borderRadius: '8px' }}>
+  <h2>新しい地点を追加</h2>
+  <MapLocationForm ... />
+</div>
+```
+
+**修正後**:
+```tsx
+<div style={{
+  marginTop: '2rem',
+  padding: '1rem',
+  background: '#f9f9f9',
+  borderRadius: '8px',
+  position: 'relative',
+  zIndex: 100,  /* sticky地図より上 */
+  clear: 'both'
+}}>
+  <h2>新しい地点を追加</h2>
+  <MapLocationForm ... />
+</div>
+```
+
+**CSSファイル**: `src/index.css:167-173`
+
+```css
+.map-container {
+  position: sticky;
+  top: 80px;
+  height: fit-content;
+  max-height: 80vh;
+  min-width: 0;
+  z-index: 1; /* フォームより下 */
+}
+```
+
+**ポイント**:
+- フォームの`z-index: 100` > 地図の`z-index: 1`
+- `position: relative`でスタッキングコンテキストを作成
+- `clear: both`でレイアウトをクリア
+
+---
+
+## 13. 実装中に発生したエラーと解決方法
 
 ### エラー1: TypeScript型インポートエラー
 
@@ -714,7 +949,7 @@ error TS2345: Argument of type '(data: { success: boolean; locations?: MapLocati
 
 ---
 
-## 13. 今後の開発で注意すること
+## 14. 今後の開発で注意すること
 
 ### TypeScriptの型安全性
 - APIレスポンスは必ず型を明示する
@@ -729,6 +964,16 @@ error TS2345: Argument of type '(data: { success: boolean; locations?: MapLocati
 - デプロイ前に必ず`npm run build`でローカルビルド確認
 - 開発サーバー（`npm run dev`）では見つからないエラーがある
 
+### レイアウトとスタイリング
+- `box-sizing: border-box`を使用してパディングを幅に含める
+- `z-index`の階層を適切に管理（フォーム > 地図 > 他の要素）
+- stickyポジションの要素は、スクロール時の重なりに注意
+
+### カスタム座標機能
+- カスタム座標は`NULL`許可
+- 既存データとの後方互換性を必ず確保
+- 座標の優先順位: カスタム → デフォルト
+
 ---
 
-**最終更新**: 2026-01-25
+**最終更新**: 2026-01-26

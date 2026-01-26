@@ -161,9 +161,11 @@ button:focus-visible {
   grid-template-columns: 2fr 1fr;
   gap: 1rem;
   margin-top: 1rem;
+  margin-bottom: 3rem; /* フォームとの間に余白を確保 */
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
+  min-height: 500px; /* 最小高さを確保 */
 }
 
 .map-container {
