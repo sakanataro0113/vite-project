@@ -70,6 +70,7 @@ type JapanMapProps = {
 const JapanMap: React.FC<JapanMapProps> = ({ locations, onPinClick }) => {
   const [isMobile, setIsMobile] = useState(false);
   const [svgContent, setSvgContent] = useState<string>('');
+  const [showGoogleMaps, setShowGoogleMaps] = useState(false);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -93,18 +94,52 @@ const JapanMap: React.FC<JapanMapProps> = ({ locations, onPinClick }) => {
 
   return (
     <div style={{ position: 'relative', width: '100%', maxHeight: '800px' }}>
-      {/* Geoloniaの日本地図SVG（インライン埋め込み） */}
-      <div
-        dangerouslySetInnerHTML={{ __html: svgContent }}
-        style={{
-          width: '100%',
-          border: '1px solid #ccc',
-          borderRadius: '8px'
-        }}
-      />
+      {/* 切り替えボタン */}
+      <div style={{ marginBottom: '0.5rem', display: 'flex', gap: '0.5rem' }}>
+        <button
+          onClick={() => setShowGoogleMaps(false)}
+          style={{
+            padding: '0.5rem 1rem',
+            backgroundColor: !showGoogleMaps ? '#3b82f6' : '#e5e7eb',
+            color: !showGoogleMaps ? 'white' : '#374151',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontWeight: !showGoogleMaps ? '600' : 'normal'
+          }}
+        >
+          SVG地図
+        </button>
+        <button
+          onClick={() => setShowGoogleMaps(true)}
+          style={{
+            padding: '0.5rem 1rem',
+            backgroundColor: showGoogleMaps ? '#3b82f6' : '#e5e7eb',
+            color: showGoogleMaps ? 'white' : '#374151',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontWeight: showGoogleMaps ? '600' : 'normal'
+          }}
+        >
+          Google Maps（参照用）
+        </button>
+      </div>
 
-      {/* ピンを絶対配置で重ねる */}
-      {locations.map((location) => {
+      {!showGoogleMaps ? (
+        <>
+          {/* Geoloniaの日本地図SVG（インライン埋め込み） */}
+          <div
+            dangerouslySetInnerHTML={{ __html: svgContent }}
+            style={{
+              width: '100%',
+              border: '1px solid #ccc',
+              borderRadius: '8px'
+            }}
+          />
+
+          {/* ピンを絶対配置で重ねる */}
+          {locations.map((location) => {
         // カスタム座標があればそれを使用、なければ都道府県座標
         let x, y;
         if (location.x_coordinate !== null && location.x_coordinate !== undefined &&
@@ -132,19 +167,14 @@ const JapanMap: React.FC<JapanMapProps> = ({ locations, onPinClick }) => {
             }}
           >
             {/* 針状のピン */}
-            <svg width="20" height="36" viewBox="0 0 20 36">
-              {/* 針の先端（鋭い三角形） */}
-              <path
-                d="M10 36 L8 28 L12 28 Z"
-                fill="#cc0000"
-              />
-              {/* 針の本体（細い棒） */}
+            <svg width="20" height="32" viewBox="0 0 20 32">
+              {/* 針の本体（金属っぽい色） */}
               <rect
                 x="9"
                 y="8"
                 width="2"
-                height="20"
-                fill="#ff4444"
+                height="24"
+                fill="url(#metalGradient)"
               />
               {/* ピンの頭（円形） */}
               <circle
@@ -163,10 +193,36 @@ const JapanMap: React.FC<JapanMapProps> = ({ locations, onPinClick }) => {
                 fill="white"
                 opacity="0.7"
               />
+              {/* 金属のグラデーション定義 */}
+              <defs>
+                <linearGradient id="metalGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" style={{ stopColor: '#5a5a5a', stopOpacity: 1 }} />
+                  <stop offset="50%" style={{ stopColor: '#c0c0c0', stopOpacity: 1 }} />
+                  <stop offset="100%" style={{ stopColor: '#5a5a5a', stopOpacity: 1 }} />
+                </linearGradient>
+              </defs>
             </svg>
           </div>
         );
       })}
+        </>
+      ) : (
+        <>
+          {/* Google Maps（参照用） */}
+          <iframe
+            src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d7467689.5!2d138.0!3d36.5!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f5.0!5e0!3m2!1sja!2sjp"
+            width="100%"
+            height="600"
+            style={{ border: '1px solid #ccc', borderRadius: '8px' }}
+            allowFullScreen
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+          />
+          <p style={{ fontSize: '0.9rem', color: '#666', marginTop: '0.5rem' }}>
+            ※ 座標確認用の参照マップです。手動でズーム・移動して各地点を確認できます。
+          </p>
+        </>
+      )}
     </div>
   );
 };
