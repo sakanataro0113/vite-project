@@ -131,28 +131,35 @@ const JapanMap: React.FC<JapanMapProps> = ({ locations, onPinClick }) => {
               zIndex: 10
             }}
           >
-            {/* ピン */}
-            <svg width="24" height="32" viewBox="0 0 24 32">
-              {/* ピンの影 */}
-              <ellipse
-                cx="12"
-                cy="30"
-                rx="4"
-                ry="2"
-                fill="rgba(0,0,0,0.3)"
-              />
-              {/* ピン本体 */}
+            {/* 針状のピン */}
+            <svg width="20" height="36" viewBox="0 0 20 36">
+              {/* 針の先端（鋭い三角形） */}
               <path
-                d="M12 0 C7 0 3 4 3 9 C3 14 12 24 12 24 S21 14 21 9 C21 4 17 0 12 0 Z"
+                d="M10 36 L8 28 L12 28 Z"
+                fill="#cc0000"
+              />
+              {/* 針の本体（細い棒） */}
+              <rect
+                x="9"
+                y="8"
+                width="2"
+                height="20"
+                fill="#ff4444"
+              />
+              {/* ピンの頭（円形） */}
+              <circle
+                cx="10"
+                cy="6"
+                r="6"
                 fill="#ff4444"
                 stroke="#cc0000"
                 strokeWidth="1"
               />
-              {/* ピンの中心 */}
+              {/* ピンの頭の中心 */}
               <circle
-                cx="12"
-                cy="9"
-                r="4"
+                cx="10"
+                cy="6"
+                r="3"
                 fill="white"
                 opacity="0.7"
               />
