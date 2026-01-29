@@ -333,6 +333,8 @@ app.post('/api/map-locations', async (c) => {
     const prefecture = formData.get('prefecture') as string;
     const memo = formData.get('memo') as string;
     const linked_post_id = formData.get('linked_post_id') as string | null;
+    const xCoordinateStr = formData.get('x_coordinate') as string | null;
+    const yCoordinateStr = formData.get('y_coordinate') as string | null;
     const latitude = formData.get('latitude') as string | null;
     const longitude = formData.get('longitude') as string | null;
 
@@ -343,11 +345,22 @@ app.post('/api/map-locations', async (c) => {
 
     const created_at = new Date().toISOString();
 
-    // 緯度経度が提供されている場合、X/Y座標に変換
+    // 座標の優先順位: XY座標 > 緯度経度 > null
     let xCoord: number | null = null;
     let yCoord: number | null = null;
 
-    if (latitude && longitude) {
+    // 1. XY座標が直接提供されている場合（モーダルから）
+    if (xCoordinateStr && yCoordinateStr) {
+      const x = parseFloat(xCoordinateStr);
+      const y = parseFloat(yCoordinateStr);
+
+      if (!isNaN(x) && !isNaN(y)) {
+        xCoord = x;
+        yCoord = y;
+      }
+    }
+    // 2. XY座標がない場合、緯度経度から変換
+    else if (latitude && longitude) {
       const lat = parseFloat(latitude);
       const lon = parseFloat(longitude);
 

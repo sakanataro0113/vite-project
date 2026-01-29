@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import JapanMap, { prefectureCoordinates } from './JapanMap';
 import type { MapLocation } from './JapanMap';
+import PinLocationModal from './PinLocationModal';
 
 const MapPage: React.FC = () => {
   const [locations, setLocations] = useState<MapLocation[]>([]);
@@ -143,7 +144,7 @@ const MapPage: React.FC = () => {
         clear: 'both'
       }}>
         <h2>新しい地点を追加</h2>
-        <MapLocationForm onSubmit={(newLocation) => setLocations([...locations, newLocation])} />
+        <MapLocationForm onSubmit={(newLocation) => setLocations([...locations, newLocation])} />」
       </div>
     </div>
   );
@@ -157,7 +158,10 @@ const MapLocationForm: React.FC<{ onSubmit: (location: MapLocation) => void }> =
   const [linkedPostId, setLinkedPostId] = useState('');
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
+  const [xCoordinate, setXCoordinate] = useState<number | null>(null);
+  const [yCoordinate, setYCoordinate] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -182,10 +186,13 @@ const MapLocationForm: React.FC<{ onSubmit: (location: MapLocation) => void }> =
     if (linkedPostId) {
       formData.append('linked_post_id', linkedPostId);
     }
-    if (latitude) {
+    // XY座標が設定されている場合はそれを優先
+    if (xCoordinate !== null && yCoordinate !== null) {
+      formData.append('x_coordinate', xCoordinate.toString());
+      formData.append('y_coordinate', yCoordinate.toString());
+    } else if (latitude && longitude) {
+      // XY座標がなければ緯度経度を送信（バックエンドで変換）
       formData.append('latitude', latitude);
-    }
-    if (longitude) {
       formData.append('longitude', longitude);
     }
 
@@ -207,6 +214,8 @@ const MapLocationForm: React.FC<{ onSubmit: (location: MapLocation) => void }> =
         setLinkedPostId('');
         setLatitude('');
         setLongitude('');
+        setXCoordinate(null);
+        setYCoordinate(null);
         setSearchQuery('');
       } else {
         alert(`エラー: ${data.error}`);
@@ -228,6 +237,24 @@ const MapLocationForm: React.FC<{ onSubmit: (location: MapLocation) => void }> =
     }
     const url = `https://www.google.com/maps/search/${encodeURIComponent(query)}`;
     window.open(url, '_blank');
+  };
+
+  // ピン位置設定モーダルを開く
+  const handleOpenPinModal = () => {
+    if (!prefecture) {
+      alert('先に都道府県を選択してください');
+      return;
+    }
+    setIsModalOpen(true);
+  };
+
+  // モーダルから座標を受け取る
+  const handlePinConfirm = (x: number, y: number) => {
+    setXCoordinate(x);
+    setYCoordinate(y);
+    // 緯度経度はクリア（XY座標を優先）
+    setLatitude('');
+    setLongitude('');
   };
 
   return (
@@ -262,10 +289,42 @@ const MapLocationForm: React.FC<{ onSubmit: (location: MapLocation) => void }> =
         </select>
       </div>
 
-      {/* Google Maps検索セクション */}
+      {/* ピン位置設定セクション（推奨） */}
+      <div style={{ padding: '1rem', background: '#f0fdf4', borderRadius: '8px', border: '2px solid #86efac' }}>
+        <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1rem' }}>📍 ピンの位置を設定（推奨）</h3>
+        <button
+          type="button"
+          onClick={handleOpenPinModal}
+          style={{
+            backgroundColor: '#10b981',
+            color: 'white',
+            padding: '0.75rem 1rem',
+            borderRadius: '6px',
+            border: 'none',
+            cursor: 'pointer',
+            fontSize: '0.95rem',
+            fontWeight: '600',
+            width: '100%'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#059669'}
+          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#10b981'}
+        >
+          🎯 地図上でピンの位置を設定
+        </button>
+        {xCoordinate !== null && yCoordinate !== null && (
+          <p style={{ fontSize: '0.85rem', color: '#059669', margin: '0.5rem 0 0 0', fontWeight: '500' }}>
+            ✓ ピン位置設定済み（X: {xCoordinate.toFixed(2)}, Y: {yCoordinate.toFixed(2)}）
+          </p>
+        )}
+        <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '0.5rem 0 0 0' }}>
+          地図上でクリックまたはドラッグして正確な位置を指定できます
+        </p>
+      </div>
+
+      {/* Google Maps検索セクション（参考用） */}
       <div style={{ padding: '1rem', background: '#f0f9ff', borderRadius: '8px', border: '1px solid #bfdbfe' }}>
         <h3 style={{ margin: '0 0 0.75rem 0', fontSize: '1rem', color: '#1e40af' }}>
-          📍 Google Mapsで座標を確認
+          🔍 Google Mapsで確認（参考用）
         </h3>
         <div style={{ marginBottom: '0.75rem' }}>
           <label htmlFor="searchQuery" style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.9rem' }}>
@@ -300,44 +359,63 @@ const MapLocationForm: React.FC<{ onSubmit: (location: MapLocation) => void }> =
           🔍 Google Mapsで検索
         </button>
         <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '0.5rem 0 0 0' }}>
-          ヒント: Google Mapsで場所を右クリック → 座標をコピー → 下に貼り付け
+          実際の場所を確認する際の参考にご利用ください
         </p>
       </div>
 
-      {/* 緯度経度入力欄 */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-        <div>
-          <label htmlFor="latitude" style={{ display: 'block', marginBottom: '0.25rem' }}>
-            緯度（任意）
-          </label>
-          <input
-            id="latitude"
-            type="number"
-            step="0.000001"
-            value={latitude}
-            onChange={(e) => setLatitude(e.target.value)}
-            placeholder="例: 35.233850"
-            style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
-          />
+      {/* 緯度経度入力欄（上級者向け） */}
+      <details style={{ padding: '1rem', background: '#f9fafb', borderRadius: '8px' }}>
+        <summary style={{ cursor: 'pointer', fontWeight: '500', marginBottom: '0.5rem' }}>
+          緯度経度で直接入力（上級者向け）
+        </summary>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '0.5rem' }}>
+          <div>
+            <label htmlFor="latitude" style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.9rem' }}>
+              緯度
+            </label>
+            <input
+              id="latitude"
+              type="number"
+              step="0.000001"
+              value={latitude}
+              onChange={(e) => {
+                setLatitude(e.target.value);
+                // 緯度経度を入力したらXY座標をクリア
+                if (e.target.value) {
+                  setXCoordinate(null);
+                  setYCoordinate(null);
+                }
+              }}
+              placeholder="例: 35.233850"
+              style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
+            />
+          </div>
+          <div>
+            <label htmlFor="longitude" style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.9rem' }}>
+              経度
+            </label>
+            <input
+              id="longitude"
+              type="number"
+              step="0.000001"
+              value={longitude}
+              onChange={(e) => {
+                setLongitude(e.target.value);
+                // 緯度経度を入力したらXY座標をクリア
+                if (e.target.value) {
+                  setXCoordinate(null);
+                  setYCoordinate(null);
+                }
+              }}
+              placeholder="例: 139.095552"
+              style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
+            />
+          </div>
         </div>
-        <div>
-          <label htmlFor="longitude" style={{ display: 'block', marginBottom: '0.25rem' }}>
-            経度（任意）
-          </label>
-          <input
-            id="longitude"
-            type="number"
-            step="0.000001"
-            value={longitude}
-            onChange={(e) => setLongitude(e.target.value)}
-            placeholder="例: 139.095552"
-            style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
-          />
-        </div>
-      </div>
-      <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '0.5rem 0' }}>
-        ※ 緯度経度を入力しない場合は、都道府県のデフォルト位置にピンが表示されます
-      </p>
+        <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '0.5rem 0 0 0' }}>
+          ※ 座標を設定しない場合は、都道府県のデフォルト位置にピンが表示されます
+        </p>
+      </details>
 
       <div>
         <label htmlFor="memo" style={{ display: 'block', marginBottom: '0.25rem' }}>
@@ -385,6 +463,16 @@ const MapLocationForm: React.FC<{ onSubmit: (location: MapLocation) => void }> =
       >
         地点を追加
       </button>
+
+      {/* ピン位置設定モーダル */}
+      <PinLocationModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        prefecture={prefecture}
+        initialX={xCoordinate ?? prefectureCoordinates[prefecture]?.x ?? 50}
+        initialY={yCoordinate ?? prefectureCoordinates[prefecture]?.y ?? 50}
+        onConfirm={handlePinConfirm}
+      />
     </form>
   );
 };

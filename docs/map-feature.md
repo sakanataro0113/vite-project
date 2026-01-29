@@ -651,7 +651,129 @@ Y座標 = ((50 - 緯度) / (50 - 24)) * 100
 
 ---
 
-## 11. 今後の改善案
+## 11. 地図表示の切り替え機能
+
+### 11.1 SVG地図とGoogle Mapsの切り替え
+
+座標の精度を確認するため、SVG地図とGoogle Mapsを切り替えて表示できる機能を実装しています。
+
+**ファイル**: `src/components/JapanMap.tsx:73,97-127`
+
+```tsx
+const [showGoogleMaps, setShowGoogleMaps] = useState(false);
+
+return (
+  <div>
+    {/* 切り替えボタン */}
+    <div style={{ marginBottom: '0.5rem', display: 'flex', gap: '0.5rem' }}>
+      <button
+        onClick={() => setShowGoogleMaps(false)}
+        style={{
+          padding: '0.5rem 1rem',
+          backgroundColor: !showGoogleMaps ? '#3b82f6' : '#e5e7eb',
+          color: !showGoogleMaps ? 'white' : '#374151',
+          fontWeight: !showGoogleMaps ? '600' : 'normal'
+        }}
+      >
+        SVG地図
+      </button>
+      <button
+        onClick={() => setShowGoogleMaps(true)}
+        style={{
+          padding: '0.5rem 1rem',
+          backgroundColor: showGoogleMaps ? '#3b82f6' : '#e5e7eb',
+          color: showGoogleMaps ? 'white' : '#374151',
+          fontWeight: showGoogleMaps ? '600' : 'normal'
+        }}
+      >
+        Google Maps（参照用）
+      </button>
+    </div>
+
+    {!showGoogleMaps ? (
+      <>{/* SVG地図とピン */}</>
+    ) : (
+      <>{/* Google Maps埋め込み */}</>
+    )}
+  </div>
+);
+```
+
+**機能**:
+- トグルボタンでSVG地図とGoogle Mapsを切り替え
+- Google Mapsモードでは日本全体を表示（ズームレベル5）
+- 手動でズーム・移動して各地点の正確な位置を確認可能
+- 座標のズレを視覚的に確認しやすい
+
+**使用例**:
+1. SVG地図で登録した地点のピンを確認
+2. 「Google Maps（参照用）」ボタンをクリック
+3. Google Mapsで実際の地理位置を確認
+4. 必要に応じて緯度経度を調整
+
+### 11.2 針状のピンデザイン
+
+より正確な位置を示すため、ピンを針状にデザインしています。
+
+**ファイル**: `src/components/JapanMap.tsx:169-204`
+
+```tsx
+<svg width="20" height="32" viewBox="0 0 20 32">
+  {/* 針の本体（金属っぽい色） */}
+  <rect
+    x="9"
+    y="8"
+    width="2"
+    height="24"
+    fill="url(#metalGradient)"
+  />
+  {/* ピンの頭（円形） */}
+  <circle
+    cx="10"
+    cy="6"
+    r="6"
+    fill="#ff4444"
+    stroke="#cc0000"
+    strokeWidth="1"
+  />
+  {/* ピンの頭の中心 */}
+  <circle
+    cx="10"
+    cy="6"
+    r="3"
+    fill="white"
+    opacity="0.7"
+  />
+  {/* 金属のグラデーション定義 */}
+  <defs>
+    <linearGradient id="metalGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style={{ stopColor: '#5a5a5a', stopOpacity: 1 }} />
+      <stop offset="50%" style={{ stopColor: '#c0c0c0', stopOpacity: 1 }} />
+      <stop offset="100%" style={{ stopColor: '#5a5a5a', stopOpacity: 1 }} />
+    </linearGradient>
+  </defs>
+</svg>
+```
+
+**デザイン特徴**:
+- 針の本体：細い棒（幅2px）で金属っぽいシルバーグラデーション
+- ピンの頭：赤い円形で視認性が高い
+- 影なし：針のため影は不要
+- 先端がピンポイント：正確な位置を示す
+
+**位置指定**:
+```tsx
+style={{
+  position: 'absolute',
+  left: `${x}%`,
+  top: `${y}%`,
+  transform: 'translate(-50%, -100%)'  // 針の先端が座標位置に来るよう調整
+}}
+```
+
+---
+
+## 12. 今後の改善案
 
 ### 1. 地図の強化
 - より詳細な都道府県の輪郭
@@ -689,7 +811,7 @@ Y座標 = ((50 - 緯度) / (50 - 24)) * 100
 
 ---
 
-## 12. トラブルシューティング
+## 13. トラブルシューティング
 
 ### 地点が地図に表示されない
 - 都道府県名が正しいか確認（例: "東京都" ではなく "東京"）
@@ -846,7 +968,7 @@ return (
 
 ---
 
-## 13. 実装中に発生したエラーと解決方法
+## 14. 実装中に発生したエラーと解決方法
 
 ### エラー1: TypeScript型インポートエラー
 
@@ -949,7 +1071,7 @@ error TS2345: Argument of type '(data: { success: boolean; locations?: MapLocati
 
 ---
 
-## 14. 今後の開発で注意すること
+## 15. 今後の開発で注意すること
 
 ### TypeScriptの型安全性
 - APIレスポンスは必ず型を明示する
@@ -1085,4 +1207,4 @@ x = ((139.09555 - 125.44) / 21.21) * 100 = 64.40
 
 ---
 
-**最終更新**: 2026-01-26
+**最終更新**: 2026-01-27
