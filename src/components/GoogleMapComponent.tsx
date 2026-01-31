@@ -154,26 +154,6 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
       });
 
     setMarkers(newMarkers);
-
-    // マーカーがある場合、全てのマーカーが表示されるようズーム調整
-    if (newMarkers.length > 0) {
-      const bounds = new google.maps.LatLngBounds();
-      newMarkers.forEach(marker => {
-        const position = marker.getPosition();
-        if (position) {
-          bounds.extend(position);
-        }
-      });
-      map.fitBounds(bounds);
-
-      // ズームが近すぎる場合は調整
-      const listener = google.maps.event.addListener(map, 'idle', () => {
-        if (map.getZoom()! > 15) {
-          map.setZoom(15);
-        }
-        google.maps.event.removeListener(listener);
-      });
-    }
   }, [map, locations, onLocationClick]);
 
   if (error) {
