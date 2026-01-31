@@ -6,6 +6,7 @@ export interface MapLocation {
   prefecture: string;
   memo: string;
   linked_post_id: number | null;
+  linked_post_ids: string | null; // JSON配列の文字列
   x_coordinate: number | null;
   y_coordinate: number | null;
   created_at: string;

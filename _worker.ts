@@ -38,7 +38,8 @@ type MapLocation = {
   name: string;
   prefecture: string;
   memo: string;
-  linked_post_id: number | null;
+  linked_post_id: number | null; // 後方互換性のため残す
+  linked_post_ids: string | null; // JSON配列の文字列
   x_coordinate: number | null;
   y_coordinate: number | null;
   latitude: number | null;
@@ -335,6 +336,7 @@ app.post('/api/map-locations', async (c) => {
     const prefecture = formData.get('prefecture') as string;
     const memo = formData.get('memo') as string;
     const linked_post_id = formData.get('linked_post_id') as string | null;
+    const linked_post_ids = formData.get('linked_post_ids') as string | null; // JSON配列の文字列
     const xCoordinateStr = formData.get('x_coordinate') as string | null;
     const yCoordinateStr = formData.get('y_coordinate') as string | null;
     const latitude = formData.get('latitude') as string | null;
@@ -380,8 +382,8 @@ app.post('/api/map-locations', async (c) => {
 
     // データベースに挿入
     const result = await c.env.DB.prepare(
-      `INSERT INTO map_locations (name, prefecture, memo, linked_post_id, latitude, longitude, x_coordinate, y_coordinate, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
-    ).bind(name, prefecture, memo, linked_post_id || null, lat, lon, xCoord, yCoord, created_at).run();
+      `INSERT INTO map_locations (name, prefecture, memo, linked_post_id, linked_post_ids, latitude, longitude, x_coordinate, y_coordinate, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    ).bind(name, prefecture, memo, linked_post_id || null, linked_post_ids || null, lat, lon, xCoord, yCoord, created_at).run();
 
     const locationId = result.meta.last_row_id;
 

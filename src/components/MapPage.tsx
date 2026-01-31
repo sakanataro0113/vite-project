@@ -15,7 +15,11 @@ const MapPage: React.FC = () => {
       .then(data => {
         const response = data as { success: boolean; locations?: MapLocation[] };
         if (response.success && response.locations) {
-          setLocations(response.locations);
+          // 作成日時の昇順でソート
+          const sortedLocations = response.locations.sort((a, b) =>
+            new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+          );
+          setLocations(sortedLocations);
         }
       })
       .catch(err => console.error('Failed to fetch map locations:', err));
@@ -77,7 +81,7 @@ const MapPage: React.FC = () => {
           {locations.length === 0 ? (
             <p>まだ地点が登録されていません。</p>
           ) : (
-            locations.map(location => (
+            locations.map((location, index) => (
               <div
                 key={location.id}
                 id={`location-card-${location.id}`}
@@ -87,7 +91,7 @@ const MapPage: React.FC = () => {
                   transition: 'background-color 0.3s'
                 }}
               >
-                <p style={{ fontSize: '0.9rem', color: '#666' }}>ID: {location.id}</p>
+                <p style={{ fontSize: '0.9rem', color: '#666' }}>No. {index + 1}</p>
                 <h3 style={{ margin: '0.5rem 0', fontSize: '1.2rem' }}>
                   {location.name}
                   <span style={{
@@ -99,28 +103,58 @@ const MapPage: React.FC = () => {
                     ({location.prefecture})
                   </span>
                 </h3>
-                {/* デバッグ用：座標表示 */}
-                {(location.x_coordinate !== null && location.y_coordinate !== null) && (
+                {/* 座標表示 */}
+                {(location.latitude !== null && location.longitude !== null) && (
                   <p style={{ fontSize: '0.8rem', color: '#999' }}>
-                    座標: X={location.x_coordinate?.toFixed(2)}, Y={location.y_coordinate?.toFixed(2)}
+                    座標: 緯度 {location.latitude?.toFixed(6)}, 経度 {location.longitude?.toFixed(6)}
                   </p>
                 )}
                 <p style={{ margin: '0.5rem 0', color: '#555' }}>{location.memo}</p>
 
                 {/* リンクされた投稿があれば表示 */}
-                {location.linked_post_id && (
-                  <div style={{ marginTop: '0.5rem' }}>
-                    <Link
-                      to={`/post/${location.linked_post_id}`}
-                      style={{ color: '#0066cc', textDecoration: 'underline' }}
-                    >
-                      関連記事を見る →
-                    </Link>
-                  </div>
-                )}
+                {(() => {
+                  // linked_post_ids（複数）がある場合
+                  if (location.linked_post_ids) {
+                    try {
+                      const postIds = JSON.parse(location.linked_post_ids) as string[];
+                      if (postIds.length > 0) {
+                        return (
+                          <div style={{ marginTop: '0.5rem' }}>
+                            <p style={{ fontSize: '0.9rem', fontWeight: 'bold', margin: '0 0 0.25rem 0' }}>関連記事:</p>
+                            {postIds.map((postId, idx) => (
+                              <Link
+                                key={idx}
+                                to={`/post/${postId}`}
+                                style={{ color: '#0066cc', textDecoration: 'underline', display: 'block', marginBottom: '0.25rem' }}
+                              >
+                                記事 #{postId} →
+                              </Link>
+                            ))}
+                          </div>
+                        );
+                      }
+                    } catch (e) {
+                      console.error('Failed to parse linked_post_ids', e);
+                    }
+                  }
+                  // linked_post_id（単一）がある場合（後方互換性）
+                  if (location.linked_post_id) {
+                    return (
+                      <div style={{ marginTop: '0.5rem' }}>
+                        <Link
+                          to={`/post/${location.linked_post_id}`}
+                          style={{ color: '#0066cc', textDecoration: 'underline' }}
+                        >
+                          関連記事を見る →
+                        </Link>
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
 
                 <p style={{ fontSize: '0.8rem', color: '#999', marginTop: '0.5rem' }}>
-                  {new Date(location.created_at).toLocaleDateString()}
+                  {new Date(location.created_at).toLocaleString('ja-JP')}
                 </p>
 
                 <button
@@ -170,7 +204,7 @@ const MapLocationForm: React.FC<{ onSubmit: (location: MapLocation) => void }> =
   const [name, setName] = useState('');
   const [prefecture, setPrefecture] = useState('東京');
   const [memo, setMemo] = useState('');
-  const [linkedPostId, setLinkedPostId] = useState('');
+  const [linkedPostIds, setLinkedPostIds] = useState(''); // カンマ区切りで入力
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -202,8 +236,11 @@ const MapLocationForm: React.FC<{ onSubmit: (location: MapLocation) => void }> =
     formData.append('password', password);
     formData.append('latitude', latitude.toString());
     formData.append('longitude', longitude.toString());
-    if (linkedPostId) {
-      formData.append('linked_post_id', linkedPostId);
+
+    // 関連投稿IDをJSON配列として送信
+    if (linkedPostIds.trim()) {
+      const idsArray = linkedPostIds.split(',').map(id => id.trim()).filter(id => id);
+      formData.append('linked_post_ids', JSON.stringify(idsArray));
     }
 
     try {
@@ -221,7 +258,7 @@ const MapLocationForm: React.FC<{ onSubmit: (location: MapLocation) => void }> =
         setName('');
         setPrefecture('東京');
         setMemo('');
-        setLinkedPostId('');
+        setLinkedPostIds('');
         setLatitude(null);
         setLongitude(null);
       } else {
@@ -323,15 +360,15 @@ const MapLocationForm: React.FC<{ onSubmit: (location: MapLocation) => void }> =
       </div>
 
       <div>
-        <label htmlFor="linkedPostId" style={{ display: 'block', marginBottom: '0.25rem' }}>
-          関連する投稿ID（任意）
+        <label htmlFor="linkedPostIds" style={{ display: 'block', marginBottom: '0.25rem' }}>
+          関連する投稿ID（任意、複数可）
         </label>
         <input
-          id="linkedPostId"
-          type="number"
-          value={linkedPostId}
-          onChange={(e) => setLinkedPostId(e.target.value)}
-          placeholder="例: 12"
+          id="linkedPostIds"
+          type="text"
+          value={linkedPostIds}
+          onChange={(e) => setLinkedPostIds(e.target.value)}
+          placeholder="例: 12, 15, 20（カンマ区切り）"
           style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
         />
       </div>
