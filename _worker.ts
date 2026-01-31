@@ -41,6 +41,8 @@ type MapLocation = {
   linked_post_id: number | null;
   x_coordinate: number | null;
   y_coordinate: number | null;
+  latitude: number | null;
+  longitude: number | null;
   created_at: string;
 };
 
@@ -345,11 +347,13 @@ app.post('/api/map-locations', async (c) => {
 
     const created_at = new Date().toISOString();
 
-    // 座標の優先順位: XY座標 > 緯度経度 > null
+    // 緯度経度を取得
+    let lat: number | null = null;
+    let lon: number | null = null;
     let xCoord: number | null = null;
     let yCoord: number | null = null;
 
-    // 1. XY座標が直接提供されている場合（モーダルから）
+    // 1. XY座標が直接提供されている場合（旧形式）
     if (xCoordinateStr && yCoordinateStr) {
       const x = parseFloat(xCoordinateStr);
       const y = parseFloat(yCoordinateStr);
@@ -359,13 +363,15 @@ app.post('/api/map-locations', async (c) => {
         yCoord = y;
       }
     }
-    // 2. XY座標がない場合、緯度経度から変換
-    else if (latitude && longitude) {
-      const lat = parseFloat(latitude);
-      const lon = parseFloat(longitude);
+
+    // 2. 緯度経度が提供されている場合（新形式）
+    if (latitude && longitude) {
+      lat = parseFloat(latitude);
+      lon = parseFloat(longitude);
 
       // 有効な緯度経度かチェック
       if (!isNaN(lat) && !isNaN(lon)) {
+        // XY座標への変換（SVG地図用、後方互換性のため）
         const converted = convertLatLonToXY(lat, lon);
         xCoord = converted.x;
         yCoord = converted.y;
@@ -374,8 +380,8 @@ app.post('/api/map-locations', async (c) => {
 
     // データベースに挿入
     const result = await c.env.DB.prepare(
-      `INSERT INTO map_locations (name, prefecture, memo, linked_post_id, x_coordinate, y_coordinate, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)`
-    ).bind(name, prefecture, memo, linked_post_id || null, xCoord, yCoord, created_at).run();
+      `INSERT INTO map_locations (name, prefecture, memo, linked_post_id, latitude, longitude, x_coordinate, y_coordinate, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    ).bind(name, prefecture, memo, linked_post_id || null, lat, lon, xCoord, yCoord, created_at).run();
 
     const locationId = result.meta.last_row_id;
 

@@ -1,20 +1,28 @@
 # Map機能の解説
 
 ## 概要
-このドキュメントでは、訪問した場所を日本地図上にピンで表示し、各地点の詳細情報をカード形式で管理する「Map機能」について説明します。
+このドキュメントでは、訪問した場所をGoogle Maps上にピンで表示し、各地点の詳細情報をカード形式で管理する「Map機能」について説明します。
 
 **主な機能**:
-- 日本地図上に訪問地点をピンで表示
+- **Google Maps JavaScript API**を使用した正確な位置表示
+- 訪問地点を複数マーカーで表示
 - 地点の詳細情報（名前、都道府県、メモ）をカード形式で表示
 - 既存の記事との関連付け
-- ピンとカードの連動（ピンクリック → カードへスクロール）
+- マーカークリックで情報ウィンドウ表示
+- 地図上でクリックしてピン位置を設定
+
+**技術スタック**:
+- Google Maps JavaScript API
+- React + TypeScript
+- Cloudflare Workers (Hono)
+- Cloudflare D1 (SQLite)
 
 ---
 
 ## 1. 全体構成
 
 ### 1.1 ページレイアウト
-**ファイル**: `src/components/MapPage.tsx:58-96`
+**ファイル**: `src/components/MapPage.tsx`
 
 ```tsx
 <div style={{
@@ -22,14 +30,13 @@
   gridTemplateColumns: '2fr 1fr',
   gap: '1rem',
 }}>
-  {/* 左側: 日本地図（sticky） */}
-  <div style={{
-    position: 'sticky',
-    top: '80px',
-    height: 'fit-content',
-    maxHeight: '80vh'
-  }}>
-    <JapanMap locations={locations} onPinClick={handlePinClick} />
+  {/* 左側: Google Maps（sticky） */}
+  <div className="map-container">
+    <GoogleMapComponent
+      locations={locations}
+      onLocationClick={handlePinClick}
+      height="80vh"
+    />
   </div>
 
   {/* 右側: カード一覧（スクロール可能） */}
@@ -43,9 +50,10 @@
 ```
 
 **レイアウト特徴**:
-- 左側の地図は`position: sticky`で固定表示
+- 左側にGoogle Maps（`position: sticky`で固定表示）
 - 右側のカード一覧は独立してスクロール可能
 - グリッドレイアウト（2:1の比率）で画面を分割
+- レスポンシブ対応（モバイルでは1カラム）
 
 ---
 
@@ -403,13 +411,15 @@ app.delete('/api/map-locations/:id', async (c) => {
 | prefecture | TEXT | 都道府県名（必須） |
 | memo | TEXT | メモ・詳細説明（必須） |
 | linked_post_id | INTEGER | 関連する記事のID（NULL可） |
-| x_coordinate | REAL | X座標 0-100（NULL可） |
-| y_coordinate | REAL | Y座標 0-100（NULL可） |
+| **latitude** | **REAL** | **緯度（推奨、NULL可）** |
+| **longitude** | **REAL** | **経度（推奨、NULL可）** |
+| x_coordinate | REAL | X座標 0-100（後方互換性、NULL可） |
+| y_coordinate | REAL | Y座標 0-100（後方互換性、NULL可） |
 | created_at | TEXT | 作成日時（ISO 8601形式） |
 
-**座標の優先順位**:
-- カスタム座標（`x_coordinate`, `y_coordinate`）が設定されている場合 → それを使用
-- カスタム座標がNULLの場合 → 都道府県のデフォルト座標を使用
+**座標の使用順**:
+1. **緯度経度（latitude/longitude）** - Google Mapsで使用（推奨）
+2. XY座標（x_coordinate/y_coordinate） - SVG地図で使用（後方互換性）
 
 ### テーブル作成SQL
 ```sql
@@ -419,16 +429,18 @@ CREATE TABLE IF NOT EXISTS map_locations (
   prefecture TEXT NOT NULL,
   memo TEXT NOT NULL,
   linked_post_id INTEGER,
+  latitude REAL,
+  longitude REAL,
   x_coordinate REAL,
   y_coordinate REAL,
   created_at TEXT NOT NULL
 );
 ```
 
-### 座標カラム追加SQL（既存テーブルに追加する場合）
+### 緯度経度カラム追加SQL（既存テーブルに追加する場合）
 ```sql
-ALTER TABLE map_locations ADD COLUMN x_coordinate REAL;
-ALTER TABLE map_locations ADD COLUMN y_coordinate REAL;
+ALTER TABLE map_locations ADD COLUMN latitude REAL;
+ALTER TABLE map_locations ADD COLUMN longitude REAL;
 ```
 
 **実行方法（ローカル）**:
@@ -711,65 +723,49 @@ return (
 3. Google Mapsで実際の地理位置を確認
 4. 必要に応じて緯度経度を調整
 
-### 11.2 針状のピンデザイン
+### 11.2 Google Mapsマーカー
 
-より正確な位置を示すため、ピンを針状にデザインしています。
+Google Maps JavaScript APIの標準マーカーを使用しています。
 
-**ファイル**: `src/components/JapanMap.tsx:169-204`
+**ファイル**: `src/components/GoogleMapComponent.tsx`
 
 ```tsx
-<svg width="20" height="32" viewBox="0 0 20 32">
-  {/* 針の本体（金属っぽい色） */}
-  <rect
-    x="9"
-    y="8"
-    width="2"
-    height="24"
-    fill="url(#metalGradient)"
-  />
-  {/* ピンの頭（円形） */}
-  <circle
-    cx="10"
-    cy="6"
-    r="6"
-    fill="#ff4444"
-    stroke="#cc0000"
-    strokeWidth="1"
-  />
-  {/* ピンの頭の中心 */}
-  <circle
-    cx="10"
-    cy="6"
-    r="3"
-    fill="white"
-    opacity="0.7"
-  />
-  {/* 金属のグラデーション定義 */}
-  <defs>
-    <linearGradient id="metalGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" style={{ stopColor: '#5a5a5a', stopOpacity: 1 }} />
-      <stop offset="50%" style={{ stopColor: '#c0c0c0', stopOpacity: 1 }} />
-      <stop offset="100%" style={{ stopColor: '#5a5a5a', stopOpacity: 1 }} />
-    </linearGradient>
-  </defs>
-</svg>
+const marker = new google.maps.Marker({
+  position: { lat: location.latitude!, lng: location.longitude! },
+  map: map,
+  title: location.name,
+  icon: {
+    url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png',
+  },
+});
 ```
 
-**デザイン特徴**:
-- 針の本体：細い棒（幅2px）で金属っぽいシルバーグラデーション
-- ピンの頭：赤い円形で視認性が高い
-- 影なし：針のため影は不要
-- 先端がピンポイント：正確な位置を示す
+**マーカーの種類**:
+- **赤色マーカー**: 登録済みの地点（`red-dot.png`）
+- **緑色マーカー**: ピン位置設定時の仮マーカー（`green-dot.png`）
 
-**位置指定**:
+**情報ウィンドウ**:
 ```tsx
-style={{
-  position: 'absolute',
-  left: `${x}%`,
-  top: `${y}%`,
-  transform: 'translate(-50%, -100%)'  // 針の先端が座標位置に来るよう調整
-}}
+const infoWindow = new google.maps.InfoWindow({
+  content: `
+    <div style="padding: 8px;">
+      <h3 style="margin: 0 0 8px 0; font-size: 16px;">${location.name}</h3>
+      <p style="margin: 0 0 4px 0; color: #666; font-size: 14px;">${location.prefecture}</p>
+      <p style="margin: 0; font-size: 14px;">${location.memo}</p>
+    </div>
+  `,
+});
+
+marker.addListener('click', () => {
+  infoWindow.open(map, marker);
+  onLocationClick?.(location);
+});
 ```
+
+**機能**:
+- マーカークリックで情報ウィンドウ表示
+- 地点名、都道府県、メモを表示
+- カード一覧へのスクロール連動
 
 ---
 
@@ -1207,4 +1203,413 @@ x = ((139.09555 - 125.44) / 21.21) * 100 = 64.40
 
 ---
 
-**最終更新**: 2026-01-27
+## 16. Google Maps JavaScript APIへの移行
+
+### 16.1 背景
+
+SVG地図での座標変換精度の問題を解決するため、Google Maps JavaScript APIに移行しました。
+
+**課題**:
+- SVG地図での緯度経度→XY座標の変換精度が不十分
+- 地図の投影方法により、地域によって誤差が発生
+- ドラッグ&ドロップでの位置設定でもズレが生じる
+
+**解決策**:
+Google Maps JavaScript APIを使用することで、正確な緯度経度でピンを表示できるようになりました。
+
+### 16.2 Google Maps API キーの取得
+
+**手順**:
+
+1. **Google Cloud Consoleにアクセス**
+   - https://console.cloud.google.com/
+
+2. **プロジェクトを作成**
+   - プロジェクト名: 例「my-blog-map」
+
+3. **Maps JavaScript APIを有効化**
+   - 「APIとサービス」→「ライブラリ」
+   - 「Maps JavaScript API」を検索して有効化
+
+4. **APIキーを作成**
+   - 「APIとサービス」→「認証情報」
+   - 「認証情報を作成」→「APIキー」
+
+5. **APIキーに制限を設定（重要）**
+   - HTTPリファラー制限:
+     ```
+     https://vite-project-1kp.pages.dev/*
+     http://localhost:*
+     ```
+   - API制限: 「Maps JavaScript API」のみ選択
+
+6. **課金を有効化**
+   - クレジットカード登録が必須
+   - 月100,000マップロードまで無料（Essentials tier）
+
+### 16.3 環境変数の設定
+
+**ファイル**: `.env`
+
+```env
+# Google Maps API Key
+VITE_GOOGLE_MAPS_API_KEY=AIzaSyXXXXXXXXXXXXXXXXXXXXXXXX
+```
+
+**重要**:
+- `.env`ファイルは`.gitignore`に追加済み（公開されない）
+- ViteではVITE_プレフィックスが必要
+- 本番環境ではCloudflare Pagesの環境変数に設定
+
+**Cloudflare Pages環境変数設定**:
+1. Cloudflareダッシュボード → Pages → プロジェクト
+2. Settings → Environment variables
+3. 変数名: `VITE_GOOGLE_MAPS_API_KEY`
+4. 値: APIキー
+
+### 16.4 GoogleMapComponent
+
+新しい地図コンポーネントを作成しました。
+
+**ファイル**: `src/components/GoogleMapComponent.tsx`
+
+```tsx
+interface GoogleMapComponentProps {
+  locations: MapLocation[];
+  onLocationClick?: (location: MapLocation) => void;
+  onMapClick?: (lat: number, lng: number) => void;
+  clickableForPinPlacement?: boolean;
+  height?: string;
+}
+
+const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
+  locations,
+  onLocationClick,
+  onMapClick,
+  clickableForPinPlacement = false,
+  height = '600px'
+}) => {
+  // Google Maps APIを動的にロード
+  const loadGoogleMapsScript = (apiKey: string): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      if (window.google && window.google.maps) {
+        resolve();
+        return;
+      }
+      const script = document.createElement('script');
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}`;
+      script.async = true;
+      script.defer = true;
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error('Google Maps API failed to load'));
+      document.head.appendChild(script);
+    });
+  };
+
+  // 地図を初期化
+  const newMap = new google.maps.Map(mapRef.current, {
+    center: { lat: 36.2048, lng: 138.2529 }, // 日本の中心
+    zoom: 6,
+  });
+
+  // マーカーを配置
+  const marker = new google.maps.Marker({
+    position: { lat: location.latitude!, lng: location.longitude! },
+    map: map,
+    title: location.name,
+  });
+
+  return <div ref={mapRef} style={{ width: '100%', height }} />;
+};
+```
+
+**機能**:
+- Google Maps JavaScript APIを動的にロード
+- 複数マーカーの表示
+- マーカークリックで情報ウィンドウ
+- 自動ズーム調整（全マーカーが表示されるように）
+- 地図クリックでピン位置設定（`clickableForPinPlacement`モード）
+
+### 16.5 ピン位置設定モーダル（Google Maps版）
+
+**ファイル**: `src/components/PinLocationModalGoogleMaps.tsx`
+
+```tsx
+const PinLocationModalGoogleMaps: React.FC<PinLocationModalGoogleMapsProps> = ({
+  isOpen,
+  onClose,
+  prefecture,
+  initialLat = 36.2048,
+  initialLng = 138.2529,
+  onConfirm
+}) => {
+  const [selectedLat, setSelectedLat] = useState(initialLat);
+  const [selectedLng, setSelectedLng] = useState(initialLng);
+
+  const handleMapClick = (lat: number, lng: number) => {
+    setSelectedLat(lat);
+    setSelectedLng(lng);
+  };
+
+  return (
+    <GoogleMapComponent
+      locations={[]}
+      onMapClick={handleMapClick}
+      clickableForPinPlacement={true}
+      height="500px"
+    />
+  );
+};
+```
+
+**使い方**:
+1. 「Google Mapsで位置を設定」ボタンをクリック
+2. モーダルでGoogle Mapsが開く
+3. 地図上の任意の場所をクリック
+4. 緑色のマーカーが配置される
+5. 座標が表示される（緯度・経度）
+6. 「この位置に決定」で確定
+
+### 16.6 データベーススキーマの更新
+
+緯度経度を直接保存するようにスキーマを更新しました。
+
+**新規カラム**:
+```sql
+ALTER TABLE map_locations ADD COLUMN latitude REAL;
+ALTER TABLE map_locations ADD COLUMN longitude REAL;
+```
+
+**更新後のスキーマ**:
+```sql
+CREATE TABLE map_locations (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  prefecture TEXT NOT NULL,
+  memo TEXT NOT NULL,
+  linked_post_id INTEGER,
+  latitude REAL,           -- 新規: 緯度
+  longitude REAL,          -- 新規: 経度
+  x_coordinate REAL,       -- 後方互換性のため保持
+  y_coordinate REAL,       -- 後方互換性のため保持
+  created_at TEXT NOT NULL
+);
+```
+
+**マイグレーション実行**:
+
+```bash
+# ローカル
+npx wrangler d1 execute my_blog_db --local --command "ALTER TABLE map_locations ADD COLUMN latitude REAL; ALTER TABLE map_locations ADD COLUMN longitude REAL;"
+
+# リモート（Cloudflareダッシュボード）
+# D1 → my_blog_db → Console で以下を実行:
+ALTER TABLE map_locations ADD COLUMN latitude REAL;
+ALTER TABLE map_locations ADD COLUMN longitude REAL;
+```
+
+### 16.7 バックエンドの更新
+
+**ファイル**: `_worker.ts`
+
+**型定義の更新**:
+```typescript
+type MapLocation = {
+  id: number;
+  name: string;
+  prefecture: string;
+  memo: string;
+  linked_post_id: number | null;
+  x_coordinate: number | null;
+  y_coordinate: number | null;
+  latitude: number | null;      // 新規
+  longitude: number | null;     // 新規
+  created_at: string;
+};
+```
+
+**POSTエンドポイントの更新**:
+```typescript
+app.post('/api/map-locations', async (c) => {
+  const latitude = formData.get('latitude') as string | null;
+  const longitude = formData.get('longitude') as string | null;
+
+  let lat: number | null = null;
+  let lon: number | null = null;
+
+  if (latitude && longitude) {
+    lat = parseFloat(latitude);
+    lon = parseFloat(longitude);
+
+    // XY座標への変換（後方互換性のため）
+    if (!isNaN(lat) && !isNaN(lon)) {
+      const converted = convertLatLonToXY(lat, lon);
+      xCoord = converted.x;
+      yCoord = converted.y;
+    }
+  }
+
+  const result = await c.env.DB.prepare(
+    `INSERT INTO map_locations (name, prefecture, memo, linked_post_id, latitude, longitude, x_coordinate, y_coordinate, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  ).bind(name, prefecture, memo, linked_post_id || null, lat, lon, xCoord, yCoord, created_at).run();
+});
+```
+
+**ポイント**:
+- 緯度経度を直接保存
+- XY座標は後方互換性のため自動計算して保存
+- 既存データとの互換性を維持
+
+### 16.8 フロントエンドの更新
+
+**MapPage.tsx の主な変更**:
+
+```tsx
+// SVG地図からGoogle Mapsへ変更
+import GoogleMapComponent from './GoogleMapComponent';
+import PinLocationModalGoogleMaps from './PinLocationModalGoogleMaps';
+
+const MapPage: React.FC = () => {
+  return (
+    <div className="map-container">
+      <GoogleMapComponent
+        locations={locations}
+        onLocationClick={handlePinClick}
+        height="80vh"
+      />
+    </div>
+  );
+};
+```
+
+**フォームの変更**:
+```tsx
+const MapLocationForm: React.FC = () => {
+  const [latitude, setLatitude] = useState<number | null>(null);
+  const [longitude, setLongitude] = useState<number | null>(null);
+
+  const handlePinConfirm = (lat: number, lng: number) => {
+    setLatitude(lat);
+    setLongitude(lng);
+  };
+
+  return (
+    <form>
+      {/* ピン位置設定（必須） */}
+      <button onClick={() => setIsModalOpen(true)}>
+        🎯 Google Mapsで位置を設定
+      </button>
+
+      {latitude && longitude && (
+        <p>✓ ピン位置設定済み（緯度: {latitude.toFixed(6)}, 経度: {longitude.toFixed(6)}）</p>
+      )}
+
+      <PinLocationModalGoogleMaps
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={handlePinConfirm}
+      />
+    </form>
+  );
+};
+```
+
+### 16.9 料金とコスト管理
+
+**Google Maps Platform料金**:
+- **Essentials tier**: 月100,000マップロード無料
+- **超過時**: $7/1,000マップロード
+- **マーカー**: 追加料金なし（マップロードのみカウント）
+
+**コスト削減のベストプラクティス**:
+1. **APIキー制限を設定**（HTTPリファラー）
+2. **使用量をモニタリング**（Google Cloud Console）
+3. **予算アラートを設定**
+4. **キャッシュを活用**（ブラウザキャッシュ）
+
+**無料枠で十分な理由**:
+- 個人ブログの訪問者は通常月数千〜数万程度
+- 1訪問あたり1マップロード = 10万訪問/月まで無料
+- マーカー表示は追加料金なし
+
+### 16.10 利用規約の遵守
+
+**必須要件**:
+1. ✅ **APIキーの制限設定**（HTTPリファラー、API制限）
+2. ✅ **Googleロゴの表示**（自動表示、削除禁止）
+3. ✅ **利用規約への同意**
+4. ⚠️ **プライバシーポリシーの掲示**（推奨）
+
+**公式規約**:
+- [Google Maps Platform Terms of Service](https://cloud.google.com/maps-platform/terms)
+- [Maps JavaScript API Policies](https://developers.google.com/maps/documentation/javascript/policies)
+
+### 16.11 トラブルシューティング
+
+#### APIキーが機能しない
+
+**症状**: 地図が表示されず「Google Maps API failed to load」エラー
+
+**解決方法**:
+1. APIキーが正しく設定されているか確認
+2. Maps JavaScript APIが有効化されているか確認
+3. HTTPリファラー制限が正しいか確認
+4. ブラウザのコンソールでエラーメッセージを確認
+
+#### マーカーが表示されない
+
+**症状**: 地図は表示されるがマーカーが表示されない
+
+**原因と解決方法**:
+- 緯度経度がnullまたはundefined → データベースを確認
+- 緯度経度の範囲外 → 日本の範囲内か確認（北緯24-46度、東経122-154度）
+- データベースにlatitude/longitudeカラムがない → マイグレーション実行
+
+#### 環境変数が読み込まれない
+
+**症状**: `import.meta.env.VITE_GOOGLE_MAPS_API_KEY`がundefined
+
+**解決方法**:
+1. `.env`ファイルが正しい場所にあるか確認（プロジェクトルート）
+2. 環境変数名が`VITE_`で始まっているか確認
+3. 開発サーバーを再起動（`npm run dev`）
+4. 本番環境ではCloudflare Pagesの環境変数を設定
+
+---
+
+## 17. 新旧比較
+
+### SVG地図版 vs Google Maps版
+
+| 項目 | SVG地図版 | Google Maps版 |
+|------|-----------|---------------|
+| **精度** | ±数km〜数十km | 完全正確 |
+| **料金** | 完全無料 | 月10万マップロードまで無料 |
+| **依存関係** | なし | Google Maps API |
+| **オフライン** | 可能 | 不可 |
+| **カスタマイズ** | 自由度高 | 制限あり |
+| **保守性** | 変換式の調整必要 | Google側で管理 |
+| **ユーザー体験** | 見慣れない | Googleマップで親しみやすい |
+| **推奨度** | ❌ | ✅ |
+
+### 移行の経緯
+
+1. **SVG地図での課題**
+   - 座標変換精度が不十分
+   - ドラッグ&ドロップでも位置ズレ
+   - 投影法の違いにより地域差が発生
+
+2. **Google Maps採用の決定**
+   - 正確な位置表示が必須
+   - 無料枠で十分運用可能
+   - ユーザーにとって使いやすい
+
+3. **後方互換性の確保**
+   - 既存データはx_coordinate/y_coordinateを保持
+   - 新規データは緯度経度を優先
+   - SVGコンポーネントは削除せず保持
+
+---
+
+**最終更新**: 2026-01-31
