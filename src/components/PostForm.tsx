@@ -185,7 +185,11 @@ export default function PostForm() {
 
         setShowCommands(false);
         setCommandSearch("");
-        command.action();
+
+        // ファイルダイアログ等を開くコマンドは、textarea.focus()と競合しないよう遅延実行
+        setTimeout(() => {
+            command.action();
+        }, 50);
     };
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {//投稿ボタンを押したときに実行される関数
