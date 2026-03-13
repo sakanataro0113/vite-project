@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 
 // コマンド定義の型
 type Command = {
@@ -24,6 +24,8 @@ export default function PostForm() {
     // ref
     const contentInputRef = useRef<HTMLTextAreaElement>(null);
     const hiddenImageInputRef = useRef<HTMLInputElement>(null);
+    const contentRef = useRef(content);
+    contentRef.current = content;
 
     const categories = ["温泉", "料理", "ねこ", "技術", "日常"];
 
@@ -49,8 +51,27 @@ export default function PostForm() {
         hiddenImageInputRef.current?.click();
     };
 
+    // カーソル位置にテキストを挿入（refから最新のcontentを読む）
+    const insertTextAtCursor = useCallback((text: string) => {
+        const textarea = contentInputRef.current;
+        if (!textarea) return;
+
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const latest = contentRef.current;
+        const newContent = latest.substring(0, start) + text + latest.substring(end);
+        setContent(newContent);
+        contentRef.current = newContent;
+
+        // カーソル位置を挿入したテキストの後ろに移動
+        setTimeout(() => {
+            textarea.selectionStart = textarea.selectionEnd = start + text.length;
+            textarea.focus();
+        }, 0);
+    }, []);
+
     // 画像ファイルが選択された時の処理
-    const handleContentImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleContentImageSelect = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
             try {
@@ -63,24 +84,7 @@ export default function PostForm() {
             // input要素をリセット
             e.target.value = '';
         }
-    };
-
-    // カーソル位置にテキストを挿入
-    const insertTextAtCursor = (text: string) => {
-        const textarea = contentInputRef.current;
-        if (!textarea) return;
-
-        const start = textarea.selectionStart;
-        const end = textarea.selectionEnd;
-        const newContent = content.substring(0, start) + text + content.substring(end);
-        setContent(newContent);
-
-        // カーソル位置を挿入したテキストの後ろに移動
-        setTimeout(() => {
-            textarea.selectionStart = textarea.selectionEnd = start + text.length;
-            textarea.focus();
-        }, 0);
-    };
+    }, [insertTextAtCursor]);
 
     // コマンド定義
     const commands: Command[] = [
