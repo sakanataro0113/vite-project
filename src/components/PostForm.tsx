@@ -175,21 +175,16 @@ export default function PostForm() {
                 const newContent = content.substring(0, lastSlashIndex) + content.substring(cursorPos);
                 setContent(newContent);
 
-                // カーソル位置を調整
+                // カーソル位置を調整（focusはファイルダイアログと競合するため呼ばない）
                 setTimeout(() => {
                     textarea.selectionStart = textarea.selectionEnd = lastSlashIndex;
-                    textarea.focus();
                 }, 0);
             }
         }
 
         setShowCommands(false);
         setCommandSearch("");
-
-        // ファイルダイアログ等を開くコマンドは、textarea.focus()と競合しないよう遅延実行
-        setTimeout(() => {
-            command.action();
-        }, 50);
+        command.action();
     };
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {//投稿ボタンを押したときに実行される関数
