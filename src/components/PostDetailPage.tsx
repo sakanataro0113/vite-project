@@ -50,7 +50,7 @@ export default function PostDetailPage() {
   if (!post) return <div>記事が見つかりません。</div>;
 
   return (
-    <div className="p-4 md:p-8" style={{ textAlign: 'left' }}>
+    <div className="p-4 md:p-8">
       <Link to="#" onClick={handleGoBack} className="text-blue-500 hover:underline mb-4 inline-block">&larr; 記事一覧に戻る</Link>
       <article>
         <h1 className="text-3xl md:text-4xl font-bold mb-2">{post.title}</h1>
@@ -69,7 +69,7 @@ export default function PostDetailPage() {
             />
           </div>
         )}
-        <div className="prose lg:prose-xl max-w-none mt-8">
+        <div className="prose lg:prose-xl max-w-none mt-8" style={{ textAlign: 'left' }}>
         <ReactMarkdown
           remarkPlugins={[remarkBreaks]}
           components={{
