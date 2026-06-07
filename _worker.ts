@@ -255,7 +255,7 @@ app.post('/api/upload-image', async (c) => {
 
     // R2に画像をアップロード
     const imageBuffer = await imageFile.arrayBuffer();
-    const fileName = `${Date.now()}-${imageFile.name}`;
+    const fileName = `${Date.now()}-${imageFile.name.replace(/\s/g, '_')}`;
     await c.env.IMAGE_BUCKET.put(fileName, imageBuffer);
 
     // 画像のURLを生成
