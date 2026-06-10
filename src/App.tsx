@@ -8,6 +8,7 @@ import MapPage from './components/MapPage.tsx';
 
 export default function App(){
   const categories=["温泉","料理","ねこ","技術","日常"]
+  const [activeCat, setActiveCat] = useState("home") 
 
   //スティッキーヘッダー作成
   const[isSticky,setIsSticky]=useState(false);
@@ -57,24 +58,15 @@ export default function App(){
   return(
     <div>
       {/*ヘッダー*/}
-      <header className="site-header" style={{padding:"1rem",background:"#f0f0f0"}} ref={mainHeaderRef}>
+      <header className="site-header" ref={mainHeaderRef}>
         <h1>My Blog</h1>
-        <nav style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem" }}>
-          {/* 1行目のリンク */}
-          <div style={{ display: "flex", gap: "1rem" }}>
-            <Link to="/">ホーム</Link>
-            {firstRow.map(cat => (
-              <Link key={cat} to={`/category/${cat}`}>{cat}</Link>
-            ))}
-          </div>
-          {/* 2行目のリンク */}
-          <div style={{ display: "flex", gap: "1rem" }}>
-            {secondRow.map(cat => (
-              <Link key={cat} to={`/category/${cat}`}>{cat}</Link>
-            ))}
-            <Link to="/map">Map</Link>
-            <Link to="/profile">執筆者</Link>
-          </div>
+        <nav className="pill-track">
+          <Link to="/" className={activeCat==="home" ? "pill-link active" : "pill-link"} onClick={()=>setActiveCat("home")}>ホーム</Link>
+          {categories.map(cat=>(
+            <Link key={cat} to={`/category/${cat}`} className={activeCat===cat ? "pill-link active" : "pill-link"} onClick={()=>setActiveCat(cat)}>{cat}</Link>
+          ))}
+          <Link to="/map" className={activeCat==="map" ? "pill-link active" : "pill-link"} onClick={()=>setActiveCat("map")}>Map</Link>
+          <Link to="/profile" className={activeCat==="profile" ? "pill-link active" : "pill-link"} onClick={()=>setActiveCat("profile")}>プロフィール</Link>
         </nav>
       </header>
 
@@ -82,14 +74,20 @@ export default function App(){
       {isSticky && (
         <header className="sticky-header">
           <div className="sticky-header-inner">
-            <Link to="/profile">プロフィール</Link>
-            <nav>
-              <button onClick={scrollToPostForm} className="hover:underline">投稿</button>
-              <button onClick={scrollToTop} className="hover:underline">トップ</button>
-            </nav>
+            <Link to="/" className="sticky-site-title" onClick={()=>setActiveCat("home")}>My Blog</Link>
+            <div className="sticky-sep"/>
+            <Link to="/" className={activeCat==="home" ? "sticky-link active" : "sticky-link"} onClick={()=>setActiveCat("home")}>ホーム</Link>
+            {categories.map(cat=>(
+              <Link key={cat} to={`/category/${cat}`} className={activeCat===cat ? "sticky-link active" : "sticky-link"} onClick={()=>setActiveCat(cat)}>{cat}</Link>
+            ))}
+            <Link to="/map" className={activeCat==="map" ? "sticky-link active" : "sticky-link"} onClick={()=>setActiveCat("map")}>Map</Link>
+            <div className="sticky-sep"/>
+            <Link to="/profile" className="sticky-muted" onClick={()=>setActiveCat("profile")}>プロフィール</Link>
+            <button onClick={scrollToPostForm} className="sticky-post-btn">投稿</button>
           </div>
         </header>
       )}
+
 
       {/*ページ切り替え */}
       <main style={{padding:"1rem"}}>
@@ -113,4 +111,3 @@ export default function App(){
     </div>
   )
 }
-
