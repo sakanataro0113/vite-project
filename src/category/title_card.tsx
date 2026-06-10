@@ -53,7 +53,7 @@ const TitleCard:React.FC<TitleCardProps>=({category})=>{
 
 
     return(
-    <div>
+    <div className='articles-wrapper'>
         <h1 style={{fontSize:"36px", fontWeight:"700", letterSpacing:"-0.03em", margin:"48px 0 32px"}}>{category}の記事一覧</h1>
         {filteredPosts.length===0?(
             <p>このカテゴリの記事はまだありません。</p>

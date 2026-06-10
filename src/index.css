@@ -368,6 +368,15 @@ button:focus-visible {
   }
 }
 
+.articles-wrapper {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 0 24px 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
 .article-card {
   display: grid;
   grid-template-columns: 1fr 200px;
@@ -378,7 +387,6 @@ button:focus-visible {
   border-radius: 18px;
   overflow: hidden;
   box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-  margin-bottom: 20px;
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
@@ -390,6 +398,7 @@ button:focus-visible {
 
 .article-card-body {
   padding: 22px 24px;
+  text-align: left; 
 }
 
 .article-card-meta {
@@ -449,6 +458,6 @@ button:focus-visible {
 
 .article-card-thumb {
   width: 100%;
-  height: 100%;
+  height: 180px;
   object-fit: cover;
 }
