@@ -35,24 +35,12 @@ export default function App(){
   },[]);//このeffectは最初に一度だけ実行
 
 
-  //カテゴリを2行に分けたい
-  const firstRow=categories.slice(0,3);
-  const secondRow=categories.slice(3);
-
   //PostFormコンポーネントのための参照(ref)を作成
   const postFormRef=useRef<HTMLDivElement>(null);
 
   //PostFormまでスクロールする関数
   const scrollToPostForm=()=>{
     postFormRef.current?.scrollIntoView({behavior:"smooth"});
-  };
-
-  //topまでスクロールする関数
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0, // ページの最上部(0px地点)へ
-      behavior: 'smooth' // スムーズにスクロールする
-    });
   };
 
   return(
