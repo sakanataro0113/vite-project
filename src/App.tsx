@@ -1,4 +1,4 @@
-import {Routes,Route,Link} from 'react-router-dom'
+import {Routes,Route,Link,useLocation} from 'react-router-dom'
 import {useState,useEffect,useRef} from 'react';
 import TitleCard from './category/title_card.tsx';
 import PostDetailPage from './components/PostDetailPage.tsx';
@@ -9,6 +9,12 @@ import MapPage from './components/MapPage.tsx';
 export default function App(){
   const categories=["温泉","料理","ねこ","技術","日常"]
   const [activeCat, setActiveCat] = useState("home") 
+
+  const location = useLocation();
+
+  useEffect(()=>{
+    window.scrollTo({top:0, behavior:'instant'});
+  },[location.pathname]);
 
   //スティッキーヘッダー作成
   const[isSticky,setIsSticky]=useState(false);
