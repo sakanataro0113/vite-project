@@ -64,30 +64,56 @@ const TitleCard:React.FC<TitleCardProps>=({category})=>{
                         .replace(/\[.*?\]\(.*?\)/g, '')
                         .slice(0, 50);
                     return(
-                        <div key={post.id} className="category-card border rounded-lg p-4 shadow-md mb-4">
-                            {/* ↓↓ 作成日時を表示 ↓↓ */}
-                            <p>作成日時: {new Date(post.created_at).toLocaleString()}</p>
-                            {/* ↓↓ IDを表示 ↓↓ */}
-                            <p>記事ID: {post.id}</p>
-                            <h2 className='w-full break-words'>{post.title}</h2>
-                            {/*imageが存在するときに表示 */}
-                            {post.image_url&&(
-                                <img
-                                    src={post.image_url}
-                                    alt={post.title}
-                                    className='article-image'
-                                />
-                            )}
-                            <p className='w-full break-words'>{plainText}</p>
-                            <Link to={`/post/${post.id}`}>続きを読む</Link>
-                            <button
-                                onClick={() => handleDelete(post.id)}
-                                className="bg-red-500 text-white py-1 px-3 rounded hover:bg-red-600"
-                            >
-                                削除
-                            </button>
-                        </div> 
+                        <div>
+    <h1 style={{fontSize:"36px", fontWeight:"700", letterSpacing:"-0.03em", margin:"48px 0 32px"}}>{category}の記事一覧</h1>
+    {filteredPosts.length === 0 ? (
+      <p>このカテゴリの記事はまだありません。</p>
+    ) : (
+      filteredPosts.map(post => {
+        // マークダウンの画像・リンク記法を除去して先頭80文字を抜粋
+        const plainText = post.content
+          .replace(/!\[.*?\]\(.*?\)/g, '[画像]')
+          .replace(/\[.*?\]\(.*?\)/g, '')
+          .slice(0, 80);
+        return (
+          // 画像ありの場合は has-image クラスを追加してgrid-template-columnsを2列にする
+            <div key={post.id} className="article-card">
+
+                        {/* 左側：テキストエリア */}
+                        <div className="article-card-body">
+
+                        {/* 投稿日時とカテゴリタグ */}
+                        <div className="article-card-meta">
+                            <span>{new Date(post.created_at).toLocaleDateString()}</span>
+                            <span className="article-card-tag">{post.category}</span>
+                        </div>
+
+                        {/* タイトル */}
+                        <h2 className="article-card-title">{post.title}</h2>
+
+                        {/* 本文の抜粋 */}
+                        <p className="article-card-excerpt">{plainText}</p>
+
+                        {/* 続きを読むリンクと削除ボタン */}
+                        <div className="article-card-actions">
+                            <Link to={`/post/${post.id}`} className="article-card-link">続きを読む →</Link>
+                            <button onClick={() => handleDelete(post.id)} className="article-card-delete">削除</button>
+                        </div>
+
+                        </div>
+
+                        {/* 右側：サムネイル画像（画像がある場合のみ表示） */}
+                        {post.image_url && (
+                        <img src={post.image_url} alt={post.title} className="article-card-thumb" />
+                        )}
+
+                    </div>
                     );
+                })
+                )}
+            </div>
+
+        );
                 })
             )}
         </div>

@@ -70,7 +70,7 @@ export default function App(){
           <div className="sticky-header-inner">
             <Link to="/" className="sticky-site-title" onClick={()=>window.scrollTo({top:0, behavior:'smooth'})}>My Blog</Link>
             <div className="sticky-sep"/>
-            <Link to="/" className={activeCat==="home" ? "sticky-link active" : "sticky-link"} onClick={()=>{setActiveCat("home"); window.scrollTo({top:0, behavior:'smooth'})}}>ホーム</Link>
+            <Link to={location.pathname} className={activeCat==="home" ? "sticky-link active" : "sticky-link"} onClick={()=>{setActiveCat("home"); window.scrollTo({top:0, behavior:'smooth'})}}>トップ</Link>
             {categories.map(cat=>(
               <Link key={cat} to={`/category/${cat}`} className={activeCat===cat ? "sticky-link active" : "sticky-link"} onClick={()=>setActiveCat(cat)}>{cat}</Link>
             ))}
