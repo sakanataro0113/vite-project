@@ -85,7 +85,7 @@ const TitleCard:React.FC<TitleCardProps>=({category})=>{
 
                             {/* 続きを読むリンクと削除ボタン */}
                             <div className="article-card-actions">
-                                <button onClick={() => handleDelete(post.id)} className="article-card-delete">削除</button>
+                                <button onClick={(e) => {e.stopPropagation(); handleDelete(post.id); }} className="article-card-delete">削除</button>
                             </div>
 
                         </div>
