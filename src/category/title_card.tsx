@@ -66,7 +66,7 @@ const TitleCard:React.FC<TitleCardProps>=({category})=>{
                     .slice(0, 80);
                 return(
                     // 常に2列グリッド（画像なしの場合は右側が空白）
-                    <div key={post.id} className="article-card">
+                    <Link key={post.id} to={`/post/${post.id}`} className="article-card">
 
                         {/* 左側：テキストエリア */}
                         <div className="article-card-body">
@@ -96,7 +96,7 @@ const TitleCard:React.FC<TitleCardProps>=({category})=>{
                             <img src={post.image_url} alt={post.title} className="article-card-thumb" />
                         )}
 
-                    </div>
+                    </Link>
                 );
             })
         )}

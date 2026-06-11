@@ -461,3 +461,9 @@ button:focus-visible {
   height: 180px;
   object-fit: cover;
 }
+
+a.article-card {
+  display: grid;
+  text-decoration: none !important;
+  color: inherit !important;
+}
