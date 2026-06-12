@@ -66,14 +66,13 @@ export default function App(){
           <div className="sticky-header-inner">
             <Link to="/" className="sticky-site-title" onClick={()=>window.scrollTo({top:0, behavior:'smooth'})}>My Blog</Link>
             <div className="sticky-sep"/>
-            <Link to={location.pathname} className={activeCat==="home" ? "sticky-link active" : "sticky-link"} onClick={()=>{setActiveCat("home"); window.scrollTo({top:0, behavior:'smooth'})}}>トップ</Link>
+            <Link to={location.pathname} className={activeCat==="home" ? "sticky-link active" : "sticky-link"} onClick={()=>{setActiveCat("home"); window.scrollTo({top:0, behavior:'instant'})}}>トップ</Link>
             {categories.map(cat=>(
-              <Link key={cat} to={`/category/${cat}`} className={activeCat===cat ? "sticky-link active" : "sticky-link"} onClick={()=>{setActiveCat(cat); window.scrollTo({top:0, behavior:'smooth'})}}>{cat}</Link>
+              <Link key={cat} to={`/category/${cat}`} className={activeCat===cat ? "sticky-link active" : "sticky-link"} onClick={()=>{setActiveCat(cat); window.scrollTo({top:0, behavior:'instant'})}}>{cat}</Link>
             ))}
-            <Link to="/map" className={activeCat==="map" ? "sticky-link active" : "sticky-link"} onClick={()=>{setActiveCat("map"); window.scrollTo({top:0, behavior:'smooth'})}}>Map</Link>
+            <Link to="/map" className={activeCat==="map" ? "sticky-link active" : "sticky-link"} onClick={()=>{setActiveCat("map"); window.scrollTo({top:0, behavior:'instant'})}}>Map</Link>
             <div className="sticky-sep"/>
-            <Link to="/profile" className="sticky-muted" onClick={()=>{setActiveCat("profile"); window.scrollTo({top:0, behavior:'smooth'})}}>プロフィール</Link>
-
+            <Link to="/profile" className="sticky-muted" onClick={()=>{setActiveCat("profile"); window.scrollTo({top:0, behavior:'instant'})}}>プロフィール</Link>
             <button onClick={scrollToPostForm} className="sticky-post-btn">投稿</button>
           </div>
         </header>
