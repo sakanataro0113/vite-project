@@ -12,10 +12,6 @@ export default function App(){
 
   const location = useLocation();
 
-  useEffect(()=>{
-    window.scrollTo({top:0, behavior:'instant'});
-  },[location.pathname]);
-
   //スティッキーヘッダー作成
   const[isSticky,setIsSticky]=useState(false);
 
@@ -72,11 +68,12 @@ export default function App(){
             <div className="sticky-sep"/>
             <Link to={location.pathname} className={activeCat==="home" ? "sticky-link active" : "sticky-link"} onClick={()=>{setActiveCat("home"); window.scrollTo({top:0, behavior:'smooth'})}}>トップ</Link>
             {categories.map(cat=>(
-              <Link key={cat} to={`/category/${cat}`} className={activeCat===cat ? "sticky-link active" : "sticky-link"} onClick={()=>setActiveCat(cat)}>{cat}</Link>
+              <Link key={cat} to={`/category/${cat}`} className={activeCat===cat ? "sticky-link active" : "sticky-link"} onClick={()=>{setActiveCat(cat); window.scrollTo({top:0, behavior:'smooth'})}}>{cat}</Link>
             ))}
-            <Link to="/map" className={activeCat==="map" ? "sticky-link active" : "sticky-link"} onClick={()=>setActiveCat("map")}>Map</Link>
+            <Link to="/map" className={activeCat==="map" ? "sticky-link active" : "sticky-link"} onClick={()=>{setActiveCat("map"); window.scrollTo({top:0, behavior:'smooth'})}}>Map</Link>
             <div className="sticky-sep"/>
-            <Link to="/profile" className="sticky-muted" onClick={()=>setActiveCat("profile")}>プロフィール</Link>
+            <Link to="/profile" className="sticky-muted" onClick={()=>{setActiveCat("profile"); window.scrollTo({top:0, behavior:'smooth'})}}>プロフィール</Link>
+
             <button onClick={scrollToPostForm} className="sticky-post-btn">投稿</button>
           </div>
         </header>
