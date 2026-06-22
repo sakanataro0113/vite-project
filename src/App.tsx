@@ -10,8 +10,6 @@ export default function App(){
   const categories=["温泉","料理","ねこ","技術","日常"]
   const [activeCat, setActiveCat] = useState("home") 
 
-  const location = useLocation();
-
   //スティッキーヘッダー作成
   const[isSticky,setIsSticky]=useState(false);
 
