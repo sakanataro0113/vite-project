@@ -1,4 +1,4 @@
-import {Routes,Route,Link,useLocation} from 'react-router-dom'
+import {Routes,Route,Link} from 'react-router-dom'
 import {useState,useEffect,useRef} from 'react';
 import TitleCard from './category/title_card.tsx';
 import PostDetailPage from './components/PostDetailPage.tsx';
