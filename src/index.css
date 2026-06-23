@@ -69,11 +69,16 @@ button:focus-visible {
 }
 
 .category-card {
-  border: 1px solid #e5e7eb; /* 枠線（薄いグレー） */
-  border-radius: 0.5rem;      /* 角丸 */
-  padding: 1rem;              /* 内側の余白 */
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); /* 影 */
-  margin-bottom: 1rem;        /* 下の余白 */
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  margin-bottom: 1rem;
+}
+
+.map-add-form {
+  background: #f9f9f9;
 }
 
 .force-bg-gray {
@@ -596,6 +601,60 @@ a.article-card {
   background: rgba(255,255,255,0.82) !important;
   color: #1c1c1e !important;
   box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+/* ══ ダークモード対応（ボトムナビ） ══ */
+@media (prefers-color-scheme: dark) {
+  .bottom-nav-bar {
+    background: rgba(28,28,30,0.75);
+    border-color: rgba(255,255,255,0.12);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08);
+  }
+  .bottom-nav-category-popup {
+    background: rgba(28,28,30,0.85);
+    border-color: rgba(255,255,255,0.12);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08);
+  }
+  .bottom-nav-item {
+    color: rgba(255,255,255,0.87) !important;
+    -webkit-text-fill-color: rgba(255,255,255,0.87);
+  }
+  .bottom-nav-item.active,
+  .bottom-nav-item:hover {
+    background: rgba(255,255,255,0.12);
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff;
+  }
+  .bottom-nav-cat-link {
+    color: rgba(255,255,255,0.87) !important;
+    background: rgba(255,255,255,0.08);
+  }
+  .bottom-nav-cat-link.active,
+  .bottom-nav-cat-link:hover {
+    background: rgba(255,255,255,0.18) !important;
+    color: #ffffff !important;
+  }
+
+  /* MapPage ロケーションカード・追加フォーム */
+  .category-card {
+    background-color: #2c2c2e;
+    border-color: rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.87);
+  }
+  .category-card h3,
+  .category-card p {
+    color: rgba(255,255,255,0.87);
+  }
+
+  .map-add-form {
+    background: #2c2c2e;
+  }
+  .map-add-form h2,
+  .map-add-form h3,
+  .map-add-form label,
+  .map-add-form p {
+    color: rgba(255,255,255,0.87);
+  }
 }
 
 @media (max-width: 1023px) {

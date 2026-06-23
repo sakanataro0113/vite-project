@@ -87,7 +87,7 @@ const MapPage: React.FC = () => {
                 id={`location-card-${location.id}`}
                 className="category-card border rounded-lg p-4 shadow-md mb-4"
                 style={{
-                  backgroundColor: selectedLocation?.id === location.id ? '#fff3cd' : 'white',
+                  backgroundColor: selectedLocation?.id === location.id ? '#fff3cd' : undefined,
                   transition: 'background-color 0.3s'
                 }}
               >
@@ -172,10 +172,9 @@ const MapPage: React.FC = () => {
       </div>
 
       {/* 地点追加フォーム */}
-      <div style={{
+      <div className="map-add-form" style={{
         marginTop: '2rem',
         padding: '1rem',
-        background: '#f9f9f9',
         borderRadius: '8px',
         position: 'relative',
         zIndex: 10,
