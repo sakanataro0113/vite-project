@@ -81,6 +81,19 @@ button:focus-visible {
   background: #f9f9f9;
 }
 
+.pin-location-box {
+  background: #f0fdf4;
+  border: 2px solid #86efac;
+}
+
+.pin-set-confirm {
+  color: #059669;
+}
+
+.pin-set-hint {
+  color: #64748b;
+}
+
 .force-bg-gray {
   background-color: #839be9 !important; 
 }
@@ -655,6 +668,20 @@ a.article-card {
   .map-add-form label,
   .map-add-form p {
     color: rgba(255,255,255,0.87);
+  }
+
+  .pin-location-box {
+    background: #1c3a2e;
+    border-color: rgba(134,239,172,0.3);
+  }
+  .pin-location-box h3 {
+    color: rgba(255,255,255,0.87) !important;
+  }
+  .pin-set-confirm {
+    color: #4ade80 !important;
+  }
+  .pin-set-hint {
+    color: rgba(255,255,255,0.55) !important;
   }
 }
 

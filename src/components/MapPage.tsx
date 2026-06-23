@@ -181,7 +181,7 @@ const MapPage: React.FC = () => {
         clear: 'both'
       }}>
         <h2>新しい地点を追加</h2>
-        <MapLocationForm onSubmit={(newLocation) => setLocations([...locations, newLocation])} />」
+        <MapLocationForm onSubmit={(newLocation) => setLocations([...locations, newLocation])} />
       </div>
     </div>
   );
@@ -313,8 +313,8 @@ const MapLocationForm: React.FC<{ onSubmit: (location: MapLocation) => void }> =
       </div>
 
       {/* ピン位置設定セクション（必須） */}
-      <div style={{ padding: '1rem', background: '#f0fdf4', borderRadius: '8px', border: '2px solid #86efac' }}>
-        <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1rem' }}>📍 ピンの位置を設定 *</h3>
+      <div className="pin-location-box" style={{ padding: '1rem', borderRadius: '8px' }}>
+        <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1rem' }}>ピンの位置を設定 *</h3>
         <button
           type="button"
           onClick={handleOpenPinModal}
@@ -332,14 +332,14 @@ const MapLocationForm: React.FC<{ onSubmit: (location: MapLocation) => void }> =
           onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#059669'}
           onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#10b981'}
         >
-          🎯 Google Mapsで位置を設定
+          Google Mapsで位置を設定
         </button>
         {latitude !== null && longitude !== null && (
-          <p style={{ fontSize: '0.85rem', color: '#059669', margin: '0.5rem 0 0 0', fontWeight: '500' }}>
+          <p className="pin-set-confirm" style={{ fontSize: '0.85rem', margin: '0.5rem 0 0 0', fontWeight: '500' }}>
             ✓ ピン位置設定済み（緯度: {latitude.toFixed(6)}, 経度: {longitude.toFixed(6)}）
           </p>
         )}
-        <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '0.5rem 0 0 0' }}>
+        <p className="pin-set-hint" style={{ fontSize: '0.85rem', margin: '0.5rem 0 0 0' }}>
           地図上でクリックして正確な位置を指定してください
         </p>
       </div>
