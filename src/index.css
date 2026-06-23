@@ -642,8 +642,9 @@ a.article-card {
     color: rgba(255,255,255,0.87);
   }
   .category-card h3,
-  .category-card p {
-    color: rgba(255,255,255,0.87);
+  .category-card p,
+  .category-card span {
+    color: rgba(255,255,255,0.7) !important;
   }
 
   .map-add-form {

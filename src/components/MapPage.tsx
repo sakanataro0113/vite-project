@@ -91,7 +91,7 @@ const MapPage: React.FC = () => {
                   transition: 'background-color 0.3s'
                 }}
               >
-                <p style={{ fontSize: '0.9rem', color: '#666' }}>No. {index + 1}</p>
+                <p style={{ fontSize: '0.9rem', color: '#666', fontWeight: 'bold' }}>No. {index + 1}</p>
                 <h3 style={{ margin: '0.5rem 0', fontSize: '1.2rem' }}>
                   {location.name}
                   <span style={{
@@ -109,7 +109,7 @@ const MapPage: React.FC = () => {
                     座標: 緯度 {location.latitude?.toFixed(6)}, 経度 {location.longitude?.toFixed(6)}
                   </p>
                 )}
-                <p style={{ margin: '0.5rem 0', color: '#555' }}>{location.memo}</p>
+                <p style={{ margin: '0.5rem 0', color: '#555', fontWeight: 'bold' }}>{location.memo}</p>
 
                 {/* リンクされた投稿があれば表示 */}
                 {(() => {
