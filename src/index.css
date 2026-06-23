@@ -503,17 +503,13 @@ a.article-card {
     white-space: nowrap;
   }
 
-  /* スティッキーヘッダー：画面幅に収める＆横スクロール */
+  /* スティッキーヘッダー：pillデザインを維持しつつ画面幅内に収める */
   .sticky-header {
-    left: 12px;
-    right: 12px;
-    width: auto;
-    transform: none;
+    max-width: calc(100vw - 32px); /* 左右16pxずつ余白を確保 */
   }
   .sticky-header-inner {
-    overflow-x: auto;
+    overflow-x: auto; /* コンテンツが多い場合は横スクロール */
     scrollbar-width: none;
-    width: 100%;
   }
   .sticky-header-inner::-webkit-scrollbar {
     display: none;
