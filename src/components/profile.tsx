@@ -15,6 +15,23 @@ export default function Profile(){
                 >
                     https://github.com/sakanataro0113
                 </a>
+                <a 
+                    href="https://www.kaggle.com/sakanataro"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 hover:underline"
+                >
+                    https://www.kaggle.com/sakanataro
+                </a>
+                <a 
+                    href="https://atcoder.jp/users/sakanataro"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 hover:underline"
+                >
+                    https://atcoder.jp/users/sakanataro
+                </a>
+
             </p>
         </div>
     )
