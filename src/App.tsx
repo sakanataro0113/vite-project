@@ -1,4 +1,4 @@
-import {Routes,Route,Link} from 'react-router-dom'
+import {Routes,Route,Link,useNavigate} from 'react-router-dom'
 import {useState,useEffect,useRef} from 'react';
 import TitleCard from './category/title_card.tsx';
 import PostDetailPage from './components/PostDetailPage.tsx';
@@ -10,6 +10,8 @@ export default function App(){
   const categories=["温泉","料理","ねこ","技術","日常"]
   const [activeCat, setActiveCat] = useState("home")
   const [showCategoryMenu, setShowCategoryMenu] = useState(false);
+
+  const navigate=useNavigate();
 
   //スティッキーヘッダー作成
   const[isSticky,setIsSticky]=useState(false);
@@ -36,12 +38,10 @@ export default function App(){
   },[]);//このeffectは最初に一度だけ実行
 
 
-  //PostFormコンポーネントのための参照(ref)を作成
-  const postFormRef=useRef<HTMLDivElement>(null);
-
-  //PostFormまでスクロールする関数
-  const scrollToPostForm=()=>{
-    postFormRef.current?.scrollIntoView({behavior:"smooth"});
+  const goToPostForm=()=>{
+    setActiveCat("post");
+    window.scrollTo({top:0,behavior:'instant'});
+    navigate('/post/new');
   };
 
   return(
@@ -56,6 +56,7 @@ export default function App(){
           ))}
           <Link to="/map" className={activeCat==="map" ? "pill-link active" : "pill-link"} onClick={()=>setActiveCat("map")}>Map</Link>
           <Link to="/profile" className={activeCat==="profile" ? "pill-link active" : "pill-link"} onClick={()=>setActiveCat("profile")}>プロフィール</Link>
+          <Link to="/post/new" className={activeCat==="post" ? "pill-link active" : "pill-link"} onClick={()=>setActiveCat("post")}>投稿</Link>
         </nav>
       </header>
 
@@ -71,7 +72,7 @@ export default function App(){
             <Link to="/map" className={activeCat==="map" ? "sticky-link active" : "sticky-link"} onClick={()=>{setActiveCat("map"); window.scrollTo({top:0, behavior:'instant'})}}>Map</Link>
             <div className="sticky-sep"/>
             <Link to="/profile" className="sticky-muted" onClick={()=>{setActiveCat("profile"); window.scrollTo({top:0, behavior:'instant'})}}>プロフィール</Link>
-            <button onClick={scrollToPostForm} className="sticky-post-btn">投稿</button>
+            <Link to="/post/new" className={activeCat==="post" ? "sticky-link active" : "sticky-link"} onClick={goToPostForm}>投稿</Link>
           </div>
         </header>
       )}
@@ -88,13 +89,11 @@ export default function App(){
                 element={<TitleCard category={cat}/>}
               />
           ))}
+          <Route path="/post/new" element={<PostForm />} />
           <Route path="/post/:id" element={<PostDetailPage />} />
           <Route path='/map' element={<MapPage/>}/>
           <Route path='/profile' element={<Profile/>}/>
         </Routes>
-        <div ref={postFormRef}>
-          <PostForm />
-        </div>
       </main>
 
       {/* ── モバイル・タブレット ボトムナビ ── */}
@@ -139,7 +138,7 @@ export default function App(){
             <span>プロフィール</span>
           </Link>
           <button className="bottom-nav-item"
-            onClick={()=>{setShowCategoryMenu(false);scrollToPostForm();}}>
+            onClick={()=>{setShowCategoryMenu(false);goToPostForm();}}>
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
             <span>投稿</span>
           </button>
